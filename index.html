@@ -1709,8 +1709,9 @@
     }, 120);
 
     enterBtn.addEventListener('click', () => {
-      // This click IS the user gesture — unlock AudioContext right here
-      getAudioCtx();
+      // Prime the audio on this user gesture so it plays immediately on hover
+      hoverSound.play().then(() => hoverSound.pause()).catch(() => {});
+      hoverSound.currentTime = 0;
       screen.classList.add('hidden');
     });
   })();
@@ -2025,38 +2026,18 @@
   if (termBox) termObserver.observe(termBox);
 
   // ── Project card hover sound ──────────────────────────────────────────
-  let audioCtx = null;
   let soundMuted = false;
 
-  function getAudioCtx() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    return audioCtx;
-  }
-
-  // AudioContext is unlocked via the loading screen "Enter" button click.
-  // Fallback: also unlock on any interaction in case user bypasses the loader.
-  function unlockAudio() {
-    getAudioCtx();
-    document.removeEventListener('pointerdown', unlockAudio);
-  }
-  document.addEventListener('pointerdown', unlockAudio);
+  // Pre-load the hover sound
+  const hoverSound = new Audio('Audio Track-2.mp3');
+  hoverSound.volume = 0.35;
+  hoverSound.preload = 'auto';
 
   function playHoverSound() {
     if (soundMuted) return;
     try {
-      const ctx = getAudioCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(900, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.12);
-      gain.gain.setValueAtTime(0.25, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.18);
+      hoverSound.currentTime = 0;
+      hoverSound.play().catch(() => {});
     } catch(e) {}
   }
 
