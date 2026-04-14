@@ -938,6 +938,9 @@
       <div class="loader-bar" id="loader-bar"></div>
     </div>
     <div class="loader-percent" id="loader-percent">0%</div>
+    <button id="loader-enter-btn" class="btn btn-primary" style="display:none; margin-top:1.25rem; font-size:0.82rem; opacity:0; transition: opacity 0.4s ease;">
+      Enter Portfolio →
+    </button>
   </div>
 </div>
 
@@ -1680,9 +1683,10 @@
 
   // ── Loading screen ────────────────────────────────────────────────────
   (function(){
-    const screen  = document.getElementById('loading-screen');
-    const bar     = document.getElementById('loader-bar');
-    const percent = document.getElementById('loader-percent');
+    const screen     = document.getElementById('loading-screen');
+    const bar        = document.getElementById('loader-bar');
+    const percent    = document.getElementById('loader-percent');
+    const enterBtn   = document.getElementById('loader-enter-btn');
     let prog = 0;
     const messages = ['Initializing systems...', 'Loading assets...', 'Almost ready...'];
     const label = document.querySelector('.loader-label');
@@ -1691,13 +1695,24 @@
       if (prog >= 100) prog = 100;
       bar.style.width = prog + '%';
       percent.textContent = Math.floor(prog) + '%';
-      if (prog > 40)  label.textContent = messages[1];
-      if (prog > 75)  label.textContent = messages[2];
+      if (prog > 40) label.textContent = messages[1];
+      if (prog > 75) label.textContent = messages[2];
       if (prog >= 100) {
         clearInterval(interval);
-        setTimeout(() => screen.classList.add('hidden'), 300);
+        percent.textContent = '100%';
+        label.textContent = 'Ready.';
+        setTimeout(() => {
+          enterBtn.style.display = 'inline-flex';
+          requestAnimationFrame(() => { enterBtn.style.opacity = '1'; });
+        }, 300);
       }
     }, 120);
+
+    enterBtn.addEventListener('click', () => {
+      // This click IS the user gesture — unlock AudioContext right here
+      getAudioCtx();
+      screen.classList.add('hidden');
+    });
   })();
 
   const observer = new IntersectionObserver((entries) => {
@@ -2019,16 +2034,13 @@
     return audioCtx;
   }
 
-  // Unlock AudioContext on first user interaction anywhere on the page
+  // AudioContext is unlocked via the loading screen "Enter" button click.
+  // Fallback: also unlock on any interaction in case user bypasses the loader.
   function unlockAudio() {
     getAudioCtx();
-    document.removeEventListener('click', unlockAudio);
-    document.removeEventListener('keydown', unlockAudio);
-    document.removeEventListener('touchstart', unlockAudio);
+    document.removeEventListener('pointerdown', unlockAudio);
   }
-  document.addEventListener('click', unlockAudio);
-  document.addEventListener('keydown', unlockAudio);
-  document.addEventListener('touchstart', unlockAudio);
+  document.addEventListener('pointerdown', unlockAudio);
 
   function playHoverSound() {
     if (soundMuted) return;
