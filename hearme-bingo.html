@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HearMe Bingo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #1a1a2e;
+  --surface: #16213e;
+  --surface2: #0f3460;
+  --accent: #f5c518;
+  --text: #ffffff;
+  --muted: #a0aec0;
+  --B: #4fc3f7;
+  --I: #f48fb1;
+  --N: #81c784;
+  --G: #ffb74d;
+  --O: #ce93d8;
+  --B-bg: rgba(79,195,247,0.15);
+  --I-bg: rgba(244,143,177,0.15);
+  --N-bg: rgba(129,199,132,0.15);
+  --G-bg: rgba(255,183,77,0.15);
+  --O-bg: rgba(206,147,216,0.15);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--surface);
+  border-bottom: 3px solid var(--accent);
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.4rem;
+  letter-spacing: 3px;
+  color: var(--accent);
+  line-height: 1;
+}
+.logo span { color: #fff; }
+.logo-block { display: flex; flex-direction: column; line-height: 1; gap: 1px; }
+.logo-ver {
+  font-size: 1rem;
+  color: rgba(245,197,24,0.55);
+  letter-spacing: 2px;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+.logo-sig {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding-left: 2px;
+}
+.header-right { display: flex; align-items: center; gap: 12px; }
+
+/* Mute button */
+.mute-btn {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+  color: var(--muted);
+  font-size: 17px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.mute-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+.mute-btn.muted {
+  background: rgba(229,62,62,0.15);
+  border-color: #e53e3e;
+  color: #fc8181;
+}
+
+.speaking-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245,197,24,0.1);
+  border: 2px solid rgba(245,197,24,0.35);
+  border-radius: 30px;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.speaking-badge.active { opacity: 1; }
+.bar { width: 4px; height: 14px; background: var(--accent); border-radius: 2px; animation: eq 0.4s ease infinite alternate; }
+.bar:nth-child(2) { animation-delay: 0.12s; height: 9px; }
+.bar:nth-child(3) { animation-delay: 0.24s; }
+@keyframes eq { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }
+
+/* ── BUTTONS ── */
+.btn {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.btn:active { transform: scale(0.96); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:hover:not(:disabled) { background: #f7d04a; }
+.btn-danger { background: #e53e3e; color: #fff; }
+.btn-danger:hover:not(:disabled) { background: #fc5050; }
+.btn-ghost { background: rgba(255,255,255,0.08); color: #fff; border: 2px solid rgba(255,255,255,0.2); }
+.btn-ghost:hover:not(:disabled) { background: rgba(255,255,255,0.14); }
+
+/* Recap button — morphs between recap and stop states */
+.btn-recap {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.2);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.btn-recap:hover:not(:disabled) { background: rgba(255,255,255,0.14); }
+.btn-recap.is-stopping {
+  background: rgba(229,62,62,0.15);
+  border-color: #e53e3e;
+  color: #fc8181;
+}
+.btn-recap.is-stopping:hover { background: rgba(229,62,62,0.28); color: #fff; }
+
+/* ── MAIN LAYOUT ── */
+.main {
+  display: grid;
+  grid-template-columns: 1fr 310px;
+  flex: 1;
+  min-height: 0;
+  height: calc(100vh - 60px);
+}
+
+/* ── LEFT: NUMBER BOARD ── */
+.board-section {
+  padding: 18px 16px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.col-headers {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+.col-header {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem;
+  text-align: center;
+  padding: 10px 0 8px;
+  border-radius: 10px;
+  letter-spacing: 3px;
+  border-bottom: 4px solid;
+}
+.col-header.B { color: var(--B); background: var(--B-bg); border-color: var(--B); }
+.col-header.I { color: var(--I); background: var(--I-bg); border-color: var(--I); }
+.col-header.N { color: var(--N); background: var(--N-bg); border-color: var(--N); }
+.col-header.G { color: var(--G); background: var(--G-bg); border-color: var(--G); }
+.col-header.O { color: var(--O); background: var(--O-bg); border-color: var(--O); }
+
+.number-board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  flex: 1;
+}
+.num-cell {
+  background: var(--surface);
+  border: 2px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.9rem;
+  color: rgba(255,255,255,0.22);
+  transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+  user-select: none;
+  min-height: 48px;
+}
+.num-cell.called-B { background: var(--B-bg); border-color: rgba(79,195,247,0.5); color: var(--B); }
+.num-cell.called-I { background: var(--I-bg); border-color: rgba(244,143,177,0.5); color: var(--I); }
+.num-cell.called-N { background: var(--N-bg); border-color: rgba(129,199,132,0.5); color: var(--N); }
+.num-cell.called-G { background: var(--G-bg); border-color: rgba(255,183,77,0.5); color: var(--G); }
+.num-cell.called-O { background: var(--O-bg); border-color: rgba(206,147,216,0.5); color: var(--O); }
+.num-cell.latest-B { background: var(--B); color: #000 !important; border-color: var(--B); box-shadow: 0 0 0 5px rgba(79,195,247,0.3), 0 0 28px rgba(79,195,247,0.55); font-size: 2.2rem; }
+.num-cell.latest-I { background: var(--I); color: #000 !important; border-color: var(--I); box-shadow: 0 0 0 5px rgba(244,143,177,0.3), 0 0 28px rgba(244,143,177,0.55); font-size: 2.2rem; }
+.num-cell.latest-N { background: var(--N); color: #000 !important; border-color: var(--N); box-shadow: 0 0 0 5px rgba(129,199,132,0.3), 0 0 28px rgba(129,199,132,0.55); font-size: 2.2rem; }
+.num-cell.latest-G { background: var(--G); color: #000 !important; border-color: var(--G); box-shadow: 0 0 0 5px rgba(255,183,77,0.3), 0 0 28px rgba(255,183,77,0.55); font-size: 2.2rem; }
+.num-cell.latest-O { background: var(--O); color: #000 !important; border-color: var(--O); box-shadow: 0 0 0 5px rgba(206,147,216,0.3), 0 0 28px rgba(206,147,216,0.55); font-size: 2.2rem; }
+@keyframes pop-in { 0% { transform: scale(0.65); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+.num-cell.pop { animation: pop-in 0.35s ease-out; }
+
+/* ── RIGHT: CALLER PANEL ── */
+.caller-section {
+  background: var(--surface);
+  border-left: 3px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  padding: 18px 16px;
+  gap: 14px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* Caller display */
+.caller-display {
+  background: var(--surface2);
+  border-radius: 16px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+.pulse-ring {
+  position: absolute;
+  width: 90px; height: 90px;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+@keyframes pulse-out { 0% { transform: scale(0.4); opacity: 1; } 100% { transform: scale(3.2); opacity: 0; } }
+.caller-display.pulse .pulse-ring { animation: pulse-out 0.7s ease-out forwards; }
+.caller-letter {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3.8rem;
+  line-height: 1;
+  color: var(--accent);
+  letter-spacing: 4px;
+  transition: color 0.3s;
+}
+.caller-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 7rem;
+  line-height: 1;
+  color: #fff;
+  letter-spacing: 2px;
+}
+.caller-sub {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-top: 4px;
+}
+
+/* Auto-call running badge inside caller display */
+.auto-badge {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: rgba(245,197,24,0.15);
+  border: 1.5px solid rgba(245,197,24,0.5);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.auto-badge.visible { opacity: 1; }
+
+/* Stats */
+.stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-box { background: var(--surface2); border-radius: 10px; padding: 12px 8px; text-align: center; }
+.stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 2.6rem; color: var(--accent); line-height: 1; }
+.stat-lbl { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+/* Toggles */
+.option-row { display: flex; align-items: center; justify-content: space-between; font-size: 15px; font-weight: 700; color: var(--muted); }
+.toggle { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.tog-slider {
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 26px; cursor: pointer; transition: 0.2s;
+}
+.tog-slider::before {
+  content: ''; position: absolute;
+  width: 18px; height: 18px; left: 2px; top: 2px;
+  background: var(--muted); border-radius: 50%; transition: 0.2s;
+}
+.toggle input:checked + .tog-slider { background: rgba(245,197,24,0.18); border-color: var(--accent); }
+.toggle input:checked + .tog-slider::before { transform: translateX(20px); background: var(--accent); }
+
+/* Speed presets */
+.speed-block { display: flex; flex-direction: column; gap: 8px; }
+.speed-label-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; color: var(--muted); }
+.speed-presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.speed-preset-btn {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 9px 4px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: var(--muted);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+  line-height: 1.2;
+}
+.speed-preset-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.speed-preset-btn.active { background: rgba(245,197,24,0.15); border-color: var(--accent); color: var(--accent); }
+.speed-preset-btn .preset-name { display: block; font-size: 13px; }
+.speed-preset-btn .preset-sec { display: block; font-size: 10px; font-weight: 600; opacity: 0.7; margin-top: 1px; }
+
+/* Countdown bar */
+.bar-wrap { background: rgba(255,255,255,0.07); border-radius: 4px; height: 7px; overflow: hidden; display: none; }
+.bar-fill { height: 100%; background: var(--accent); border-radius: 4px; width: 100%; }
+
+/* Action buttons */
+.btn-row { display: flex; gap: 8px; }
+.btn-row .btn { flex: 1; font-size: 14px; padding: 11px 6px; }
+.btn-row.utility .btn { font-size: 13px; padding: 9px 6px; }
+
+/* Called Numbers — last 10 strip */
+.history-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
+}
+.history-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
+
+/* "View All" button beside the label */
+.view-all-btn {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(245,197,24,0.4);
+  background: rgba(245,197,24,0.08);
+  color: var(--accent);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.view-all-btn:hover { background: rgba(245,197,24,0.18); border-color: var(--accent); }
+.view-all-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Recent 10 — horizontal pills */
+.recent-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.recent-chips {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+}
+
+.recent-chip {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  text-align: center;
+  padding: 7px 2px;
+  border-radius: 8px;
+  border: 1.5px solid;
+  line-height: 1;
+  transition: all 0.2s;
+}
+@keyframes chipin { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.recent-chip.new { animation: chipin 0.25s ease-out; }
+
+.recent-chip.B { color: var(--B); border-color: rgba(79,195,247,0.35); background: rgba(79,195,247,0.09); }
+.recent-chip.I { color: var(--I); border-color: rgba(244,143,177,0.35); background: rgba(244,143,177,0.09); }
+.recent-chip.N { color: var(--N); border-color: rgba(129,199,132,0.35); background: rgba(129,199,132,0.09); }
+.recent-chip.G { color: var(--G); border-color: rgba(255,183,77,0.35); background: rgba(255,183,77,0.09); }
+.recent-chip.O { color: var(--O); border-color: rgba(206,147,216,0.35); background: rgba(206,147,216,0.09); }
+
+/* First chip (latest call) — bigger and brighter */
+.recent-chip.top {
+  font-size: 1.4rem;
+  border-width: 2px;
+  padding: 9px 2px;
+}
+.recent-chip.top.B { background: rgba(79,195,247,0.22); border-color: var(--B); }
+.recent-chip.top.I { background: rgba(244,143,177,0.22); border-color: var(--I); }
+.recent-chip.top.N { background: rgba(129,199,132,0.22); border-color: var(--N); }
+.recent-chip.top.G { background: rgba(255,183,77,0.22); border-color: var(--G); }
+.recent-chip.top.O { background: rgba(206,147,216,0.22); border-color: var(--O); }
+
+/* ── ALL NUMBERS MODAL ── */
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.82);
+  z-index: 900;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-backdrop.open { display: flex; }
+
+.modal-box {
+  background: var(--surface);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modal-in 0.25s cubic-bezier(0.34,1.4,0.64,1);
+}
+@keyframes modal-in { from { transform: scale(0.88); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+.modal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 2px;
+  color: var(--accent);
+}
+.modal-count {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-left: 10px;
+}
+.modal-close {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.modal-close:hover { background: rgba(255,255,255,0.14); }
+
+.modal-body {
+  padding: 16px 22px 22px;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+/* Modal B/I/N/G/O columns */
+.modal-cols {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+.modal-col-header {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  text-align: center;
+  padding: 8px 0 6px;
+  border-radius: 8px;
+  letter-spacing: 3px;
+  border-bottom: 3px solid;
+  margin-bottom: 6px;
+}
+.modal-col-header.B { color: var(--B); background: var(--B-bg); border-color: var(--B); }
+.modal-col-header.I { color: var(--I); background: var(--I-bg); border-color: var(--I); }
+.modal-col-header.N { color: var(--N); background: var(--N-bg); border-color: var(--N); }
+.modal-col-header.G { color: var(--G); background: var(--G-bg); border-color: var(--G); }
+.modal-col-header.O { color: var(--O); background: var(--O-bg); border-color: var(--O); }
+
+.modal-col-list { display: flex; flex-direction: column; gap: 5px; }
+
+.modal-chip {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  text-align: center;
+  padding: 7px 4px;
+  border-radius: 7px;
+  border: 1.5px solid;
+  line-height: 1;
+}
+.modal-chip.B { color: var(--B); border-color: rgba(79,195,247,0.4); background: rgba(79,195,247,0.1); }
+.modal-chip.I { color: var(--I); border-color: rgba(244,143,177,0.4); background: rgba(244,143,177,0.1); }
+.modal-chip.N { color: var(--N); border-color: rgba(129,199,132,0.4); background: rgba(129,199,132,0.1); }
+.modal-chip.G { color: var(--G); border-color: rgba(255,183,77,0.4); background: rgba(255,183,77,0.1); }
+.modal-chip.O { color: var(--O); border-color: rgba(206,147,216,0.4); background: rgba(206,147,216,0.1); }
+/* Latest call in modal gets accent ring */
+.modal-chip.latest-call {
+  border-width: 2.5px;
+  font-size: 1.5rem;
+}
+.modal-chip.latest-call.B { background: rgba(79,195,247,0.22); border-color: var(--B); }
+.modal-chip.latest-call.I { background: rgba(244,143,177,0.22); border-color: var(--I); }
+.modal-chip.latest-call.N { background: rgba(129,199,132,0.22); border-color: var(--N); }
+.modal-chip.latest-call.G { background: rgba(255,183,77,0.22); border-color: var(--G); }
+.modal-chip.latest-call.O { background: rgba(206,147,216,0.22); border-color: var(--O); }
+
+.modal-empty {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 40px 0;
+}
+
+/* Voice gender */
+.gender-row { display: flex; gap: 6px; }
+.gender-btn {
+  flex: 1;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 8px 6px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.gender-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.gender-btn.active-male { background: rgba(79,195,247,0.15); border-color: var(--B); color: var(--B); }
+.gender-btn.active-female { background: rgba(244,143,177,0.15); border-color: var(--I); color: var(--I); }
+
+/* Volume */
+.volume-row { display: flex; align-items: center; gap: 10px; }
+.vol-icon { font-size: 18px; flex-shrink: 0; }
+.vol-val { font-size: 13px; font-weight: 700; color: var(--accent); min-width: 36px; text-align: right; flex-shrink: 0; }
+input[type=range] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+
+.divider { height: 1px; background: rgba(255,255,255,0.07); flex-shrink: 0; }
+
+/* Changelog button */
+.changelog-btn {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 4px 11px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.45);
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.changelog-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border-color: rgba(255,255,255,0.35);
+}
+
+/* Changelog modal */
+.cl-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 950;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.cl-backdrop.open { display: flex; }
+
+.cl-box {
+  background: var(--surface);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modal-in 0.25s cubic-bezier(0.34,1.4,0.64,1);
+}
+
+.cl-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+.cl-title-block { display: flex; flex-direction: column; gap: 2px; }
+.cl-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 2px;
+  color: var(--accent);
+  line-height: 1;
+}
+.cl-subtitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.cl-close {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.cl-close:hover { background: rgba(255,255,255,0.14); }
+
+.cl-body {
+  padding: 20px 22px 24px;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.cl-version-block { display: flex; flex-direction: column; gap: 8px; }
+
+.cl-ver-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cl-ver-badge {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 1.5px;
+  padding: 3px 12px;
+  border-radius: 20px;
+  border: 1.5px solid;
+}
+.cl-ver-badge.prototype {
+  color: rgba(255,255,255,0.4);
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.04);
+}
+.cl-ver-badge.release {
+  color: var(--accent);
+  border-color: rgba(245,197,24,0.4);
+  background: rgba(245,197,24,0.08);
+}
+.cl-ver-badge.current {
+  color: #81c784;
+  border-color: rgba(129,199,132,0.5);
+  background: rgba(129,199,132,0.1);
+}
+.cl-ver-badge.upcoming {
+  color: var(--O);
+  border-color: rgba(206,147,216,0.4);
+  background: rgba(206,147,216,0.08);
+}
+.cl-ver-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.25);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.cl-items { display: flex; flex-direction: column; gap: 5px; padding-left: 2px; }
+.cl-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.45;
+}
+.cl-item::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.cl-item.todo { color: rgba(206,147,216,0.75); }
+.cl-item.todo::before { background: var(--O); }
+
+.cl-divider { height: 1px; background: rgba(255,255,255,0.06); }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(70px);
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+  z-index: 500;
+  transition: transform 0.3s;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-block">
+      <div class="logo">Hear<span>Me</span> Bingo <span class="logo-ver">v0.1.4</span></div>
+      <div class="logo-sig">by solidkenn</div>
+    </div>
+    <button class="changelog-btn" onclick="openChangelog()">&#128221; Changelog</button>
+  <div class="header-right">
+    <div class="speaking-badge" id="speakBadge">
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+      Caller Speaking...
+    </div>
+    <!-- Single morphing Recap / Stop button -->
+    <button class="btn btn-recap" id="recapBtn" onclick="handleRecapBtn()" disabled>🔊 Recap</button>
+    <button class="btn btn-danger" onclick="confirmResetGame()">&#8635; Reset</button>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- LEFT: BIG NUMBER BOARD -->
+  <div class="board-section">
+    <div class="col-headers">
+      <div class="col-header B">B</div>
+      <div class="col-header I">I</div>
+      <div class="col-header N">N</div>
+      <div class="col-header G">G</div>
+      <div class="col-header O">O</div>
+    </div>
+    <div class="number-board" id="numberBoard"></div>
+  </div>
+
+  <!-- RIGHT: CALLER PANEL -->
+  <div class="caller-section">
+
+    <div class="caller-display" id="callerDisplay">
+      <div class="pulse-ring"></div>
+      <div class="auto-badge" id="autoBadge">&#9654; Auto</div>
+      <div class="caller-letter" id="callerLetter">?</div>
+      <div class="caller-num" id="callerNum">--</div>
+      <div class="caller-sub" id="callerSub">Press Start</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-val" id="statCalled">0</div>
+        <div class="stat-lbl">Called</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="statLeft">75</div>
+        <div class="stat-lbl">Remaining</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Voice controls -->
+    <div class="option-row">
+      <span>&#128266; Voice Caller</span>
+      <label class="toggle"><input type="checkbox" id="voiceToggle" checked><span class="tog-slider"></span></label>
+    </div>
+    <div class="gender-row">
+      <button class="gender-btn active-male" id="genderMale" onclick="setGender('male')">&#9794; Male</button>
+      <button class="gender-btn" id="genderFemale" onclick="setGender('female')">&#9792; Female</button>
+    </div>
+    <div class="volume-row">
+      <button class="mute-btn" id="muteBtn" onclick="toggleMute()" title="Mute / Unmute">&#128266;</button>
+      <input type="range" id="volumeSlider" min="0" max="100" value="100" step="5">
+      <span class="vol-val" id="volVal">100%</span>
+    </div>
+    <div class="btn-row utility">
+      <button class="btn btn-ghost" id="voiceTestBtn" onclick="voiceTest()">🔊 Voice Test</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Auto call -->
+    <div class="option-row">
+      <span>&#9202; Auto Call</span>
+      <label class="toggle"><input type="checkbox" id="autoToggle"><span class="tog-slider"></span></label>
+    </div>
+
+    <!-- Speed presets -->
+    <div class="speed-block">
+      <div class="speed-label-row">
+        <span>Speed</span>
+      </div>
+      <div class="speed-presets">
+        <button class="speed-preset-btn" id="presetSlow" onclick="setSpeedPreset('slow')">
+          <span class="preset-name">Slow</span>
+        </button>
+        <button class="speed-preset-btn active" id="presetNormal" onclick="setSpeedPreset('normal')">
+          <span class="preset-name">Normal</span>
+        </button>
+        <button class="speed-preset-btn" id="presetFast" onclick="setSpeedPreset('fast')">
+          <span class="preset-name">Fast</span>
+        </button>
+      </div>
+      <div class="bar-wrap" id="barWrap"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Action buttons -->
+    <div class="btn-row">
+      <button class="btn btn-primary" id="startBtn" onclick="startGame()">&#9654; Start</button>
+      <button class="btn btn-ghost" id="callBtn" onclick="callNumber()" disabled>Next &#8594;</button>
+    </div>
+    <div class="btn-row utility">
+      <button class="btn btn-ghost" id="repeatBtn" onclick="repeatLastCall()" disabled>↺ Repeat Last Call</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Called numbers: label + view all button -->
+    <div class="history-label">
+      Last 10 Called
+      <button class="view-all-btn" id="viewAllBtn" onclick="openAllModal()" disabled>View All</button>
+    </div>
+
+    <!-- Last 10 chips — 2 rows of 5 -->
+    <div class="recent-strip">
+      <div class="recent-chips" id="recentRow1"></div>
+      <div class="recent-chips" id="recentRow2"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ALL NUMBERS MODAL -->
+<div class="modal-backdrop" id="allModal" onclick="handleModalBackdropClick(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div style="display:flex;align-items:baseline;gap:8px;">
+        <span class="modal-title">All Called Numbers</span>
+        <span class="modal-count" id="modalCount"></span>
+      </div>
+      <button class="modal-close" onclick="closeAllModal()">&#10005; Close</button>
+    </div>
+    <div class="modal-body">
+      <div id="modalEmpty" class="modal-empty" style="display:none;">No numbers called yet.</div>
+      <div class="modal-cols" id="modalCols">
+        <div>
+          <div class="modal-col-header B">B</div>
+          <div class="modal-col-list" id="mcolB"></div>
+        </div>
+        <div>
+          <div class="modal-col-header I">I</div>
+          <div class="modal-col-list" id="mcolI"></div>
+        </div>
+        <div>
+          <div class="modal-col-header N">N</div>
+          <div class="modal-col-list" id="mcolN"></div>
+        </div>
+        <div>
+          <div class="modal-col-header G">G</div>
+          <div class="modal-col-list" id="mcolG"></div>
+        </div>
+        <div>
+          <div class="modal-col-header O">O</div>
+          <div class="modal-col-list" id="mcolO"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- CHANGELOG MODAL -->
+<div class="cl-backdrop" id="clModal" onclick="handleClBackdrop(event)">
+  <div class="cl-box">
+    <div class="cl-header">
+      <div class="cl-title-block">
+        <div class="cl-title">Changelog</div>
+        <div class="cl-subtitle">HearMe Bingo &mdash; by solidkenn</div>
+      </div>
+      <button class="cl-close" onclick="closeChangelog()">&#10005; Close</button>
+    </div>
+    <div class="cl-body">
+
+      <!-- 0.1.4 — Current -->
+      <div class="cl-version-block">
+        <div class="cl-ver-header">
+          <span class="cl-ver-badge current">Build 0.1.4</span>
+          <span class="cl-ver-label">Current</span>
+        </div>
+        <div class="cl-items">
+          <div class="cl-item">Improved voice call cadence for clarity : call format is now &ldquo;Letter B, 69, B, 69&rdquo;.</div>
+          <div class="cl-item">Added a Repeat Last Call button to replay the latest spoken call.</div>
+          <div class="cl-item">Added a Voice Test button to preview speech before or during the game.</div>
+          <div class="cl-item">Added reset confirmation to prevent accidental game resets.</div>
+          <div class="cl-item">Improved Recap speech to explicitly say &ldquo;Letter&rdquo; for each B-I-N-G-O group.</div>
+          <div class="cl-item">Disabled Repeat Last Call and Recap while the caller is speaking.</div>
+          <div class="cl-item">Updated the welcome message to avoid first-word clipping on some voices.</div>
+          <div class="cl-item">Updated app version in header to v0.1.4.</div>
+        </div>
+      </div>
+
+      <div class="cl-divider"></div>
+
+      <!-- 0.1.3 -->
+      <div class="cl-version-block">
+        <div class="cl-ver-header">
+          <span class="cl-ver-badge release">Build 0.1.3</span>
+        </div>
+        <div class="cl-items">
+          <div class="cl-item">Added a Mute button on the volume slider for quick in-game silence.</div>
+          <div class="cl-item">Updated Auto Call speed presets to Slow (8s), Normal (5s), and Fast (2s) for a faster game pace.</div>
+          <div class="cl-item">Improved letter speech : now uses full phonetic names: Bee, Aye, En, Gee, Oh for clearer announcements.</div>
+          <div class="cl-item">Improved column distribution in the draw sequence : no more than 3 consecutive numbers from the same letter column.</div>
+          <div class="cl-item">Added build version v0.1.3 and &ldquo;by solidkenn&rdquo; signature to the header.</div>
+          <div class="cl-item">Added this Changelog popup.</div>
+        </div>
+      </div>
+
+      <div class="cl-divider"></div>
+
+      <!-- 0.1.2 -->
+      <div class="cl-version-block">
+        <div class="cl-ver-header">
+          <span class="cl-ver-badge release">Build 0.1.2</span>
+        </div>
+        <div class="cl-items">
+          <div class="cl-item">Improved the Called Numbers history : now shows the last 10 called numbers with a &ldquo;View All&rdquo; popup.</div>
+          <div class="cl-item">Replaced the speed interval slider with Slow, Normal, and Fast preset buttons.</div>
+          <div class="cl-item">Fixed a bug where Auto Call would not start when the Start button was clicked with Auto Call pre-enabled.</div>
+          <div class="cl-item">Improved the Recap voice announcement for better clarity.</div>
+          <div class="cl-item">Added a Stop button on Recap to cancel reading mid-recap : merged into a single toggle button.</div>
+        </div>
+      </div>
+
+      <div class="cl-divider"></div>
+
+      <!-- 0.1.1 -->
+      <div class="cl-version-block">
+        <div class="cl-ver-header">
+          <span class="cl-ver-badge release">Build 0.1.1</span>
+        </div>
+        <div class="cl-items">
+          <div class="cl-item">Added Male and Female voice selection for the Voice Caller.</div>
+          <div class="cl-item">Improved number announcement cadence : letter, number, then letter + spoken word.</div>
+          <div class="cl-item">Improved RNG using cryptographically strong randomness.</div>
+          <div class="cl-item">Added a volume slider to control Voice Caller loudness.</div>
+          <div class="cl-item">Fixed the Next button to be disabled while the Caller is still speaking.</div>
+          <div class="cl-item">Improved the Called Numbers history UI with better layout and readability.</div>
+          <div class="cl-item">Added a speed interval slider for the Auto Call feature.</div>
+        </div>
+      </div>
+
+      <div class="cl-divider"></div>
+
+      <!-- 0.1.0 -->
+      <div class="cl-version-block">
+        <div class="cl-ver-header">
+          <span class="cl-ver-badge release">Build 0.1.0</span>
+        </div>
+        <div class="cl-items">
+          <div class="cl-item">Created a fully functioning Bingo Caller.</div>
+          <div class="cl-item">Added a Voice Caller with text-to-speech announcement.</div>
+          <div class="cl-item">Added a Reset button to restart the game at any time.</div>
+          <div class="cl-item">Added a Called Numbers history panel.</div>
+          <div class="cl-item">Added a Recap button to read back all called numbers.</div>
+          <div class="cl-item">Added Auto Call : automated number drawing on a set interval.</div>
+        </div>
+      </div>
+
+      <div class="cl-divider"></div>
+
+      <!-- Prototype -->
+      <div class="cl-version-block">
+        <div class="cl-ver-header">
+          <span class="cl-ver-badge prototype">Version X</span>
+          <span class="cl-ver-label">Prototype</span>
+        </div>
+        <div class="cl-items">
+          <div class="cl-item">HearMe Bingo prototype created &mdash; initial concept and layout.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const COLS = ['B','I','N','G','O'];
+const COL_MIN = { B:1, I:16, N:31, G:46, O:61 };
+const COL_COLORS = { B:'var(--B)', I:'var(--I)', N:'var(--N)', G:'var(--G)', O:'var(--O)' };
+const LETTER_NAMES = { B:'Bee', I:'Aye', N:'En', G:'Gee', O:'Oh' };
+const LETTER_CALLS = {
+  B: 'Letter B',
+  I: 'Letter I',
+  N: 'Letter N',
+  G: 'Letter G',
+  O: 'Letter O'
+};
+const SPEED_MAP = { slow: 8, normal: 5, fast: 2 };
+
+let allBalls = [];
+let calledNums = [];
+let gameStarted = false;
+let countdownInterval = null;
+let isRecapping = false;
+let currentSpeed = 'normal'; // 'slow' | 'normal' | 'fast'
+let synth = window.speechSynthesis;
+let voices = [];
+let selectedGender = 'male';
+let lastCallPhrase = '';
+
+// ── Voice loading ──
+function loadVoices() { voices = synth.getVoices(); }
+loadVoices();
+if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = loadVoices;
+
+// ── Helpers ──
+function getCol(n) {
+  if (n <= 15) return 'B';
+  if (n <= 30) return 'I';
+  if (n <= 45) return 'N';
+  if (n <= 60) return 'G';
+  return 'O';
+}
+
+function cryptoRandInt(max) {
+  const buf = new Uint32Array(1);
+  let result;
+  const limit = 0xFFFFFFFF - (0xFFFFFFFF % max);
+  do { crypto.getRandomValues(buf); result = buf[0]; } while (result > limit);
+  return result % max;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let pass = 0; pass < 3; pass++)
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = cryptoRandInt(i + 1);
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+  return a;
+}
+
+// Shuffle with column-spread guarantee: no more than 3 consecutive same-column numbers
+function shuffleSpread(arr) {
+  const MAX_ATTEMPTS = 40;
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    const candidate = shuffle(arr);
+    if (isWellSpread(candidate)) return candidate;
+  }
+  // Fallback: force-spread by interleaving columns
+  return forceSpread(arr);
+}
+
+function isWellSpread(arr) {
+  let streak = 1;
+  for (let i = 1; i < arr.length; i++) {
+    if (getCol(arr[i]) === getCol(arr[i - 1])) {
+      streak++;
+      if (streak > 3) return false;
+    } else {
+      streak = 1;
+    }
+  }
+  return true;
+}
+
+function forceSpread(arr) {
+  // Group numbers by column, shuffle each group, then interleave
+  const groups = { B:[], I:[], N:[], G:[], O:[] };
+  arr.forEach(n => groups[getCol(n)].push(n));
+  COLS.forEach(c => { groups[c] = shuffle(groups[c]); });
+  // Round-robin interleave with crypto-shuffled column order each round
+  const result = [];
+  const colOrder = shuffle([...COLS]);
+  let slots = { B: groups.B.length, I: groups.I.length, N: groups.N.length, G: groups.G.length, O: groups.O.length };
+  while (result.length < arr.length) {
+    const shuffledCols = shuffle([...COLS]);
+    let added = false;
+    for (const c of shuffledCols) {
+      if (groups[c].length > 0) {
+        result.push(groups[c].pop());
+        added = true;
+        break;
+      }
+    }
+    if (!added) break;
+  }
+  return result;
+}
+
+function numToWords(n) {
+  const ones = ['','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+  const tens = ['','','twenty','thirty','forty','fifty','sixty','seventy'];
+  if (n < 20) return ones[n];
+  return tens[Math.floor(n / 10)] + (n % 10 ? ' ' + ones[n % 10] : '');
+}
+
+// ── Gender ──
+function setGender(gender) {
+  selectedGender = gender;
+  document.getElementById('genderMale').className = 'gender-btn' + (gender === 'male' ? ' active-male' : '');
+  document.getElementById('genderFemale').className = 'gender-btn' + (gender === 'female' ? ' active-female' : '');
+}
+
+function pickVoice() {
+  const en = voices.filter(v => v.lang.startsWith('en'));
+  if (!en.length) return null;
+  const mH = /male|man|david|mark|daniel|alex|fred|james|tom|richard|bruce|george/i;
+  const fH = /female|woman|samantha|victoria|karen|kate|zira|susan|linda|fiona|moira|tessa/i;
+  if (selectedGender === 'male')
+    return en.find(v => mH.test(v.name)) || en.find(v => !fH.test(v.name)) || en[0];
+  return en.find(v => fH.test(v.name)) || en.find(v => !mH.test(v.name)) || en[0];
+}
+
+// ── Volume & Mute ──
+let preMuteVolume = 100;
+let isMuted = false;
+
+document.getElementById('volumeSlider').addEventListener('input', function() {
+  const v = parseInt(this.value);
+  document.getElementById('volVal').textContent = v + '%';
+  updateMuteBtn(v);
+  if (v > 0) { isMuted = false; preMuteVolume = v; }
+  else { isMuted = true; }
+});
+
+function updateMuteBtn(v) {
+  const btn = document.getElementById('muteBtn');
+  if (v === 0 || isMuted) {
+    btn.innerHTML = '&#128263;';
+    btn.classList.add('muted');
+    document.getElementById('volVal').textContent = 'Muted';
+  } else {
+    btn.innerHTML = v < 50 ? '&#128265;' : '&#128266;';
+    btn.classList.remove('muted');
+    document.getElementById('volVal').textContent = v + '%';
+  }
+}
+
+function toggleMute() {
+  const slider = document.getElementById('volumeSlider');
+  if (isMuted) {
+    // Unmute — restore previous volume
+    isMuted = false;
+    slider.value = preMuteVolume || 80;
+    updateMuteBtn(parseInt(slider.value));
+  } else {
+    // Mute — save current volume first
+    preMuteVolume = parseInt(slider.value) || 80;
+    isMuted = true;
+    slider.value = 0;
+    updateMuteBtn(0);
+  }
+}
+
+function getVolume() {
+  if (isMuted) return 0;
+  return parseInt(document.getElementById('volumeSlider').value) / 100;
+}
+
+// ── Speed presets ──
+function setSpeedPreset(preset) {
+  currentSpeed = preset;
+  ['slow','normal','fast'].forEach(p => {
+    document.getElementById('preset' + p.charAt(0).toUpperCase() + p.slice(1))
+      .classList.toggle('active', p === preset);
+  });
+  // If a countdown is running, restart it with the new interval
+  if (countdownInterval && document.getElementById('autoToggle').checked) restartAutoTimer();
+}
+function getIntervalSecs() { return SPEED_MAP[currentSpeed]; }
+
+// ── Speak ──
+function setSpeakingLock(locked) {
+  const callBtn = document.getElementById('callBtn');
+  const repeatBtn = document.getElementById('repeatBtn');
+  const autoOn = document.getElementById('autoToggle').checked;
+  if (callBtn && gameStarted && allBalls.length > 0) {
+    callBtn.disabled = locked || autoOn;
+    callBtn.textContent = locked ? '\uD83D\uDD0A Calling...' : 'Next \u2192';
+  }
+  if (repeatBtn && gameStarted && lastCallPhrase) {
+    repeatBtn.disabled = locked;
+  }
+  // Recap button: managed separately by setRecapBtnState
+  if (!isRecapping) {
+    const recapBtn = document.getElementById('recapBtn');
+    if (recapBtn && calledNums.length > 0) recapBtn.disabled = locked;
+  }
+}
+
+function speak(text, onEnd) {
+  if (!document.getElementById('voiceToggle').checked) { if (onEnd) onEnd(); return; }
+  synth.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.voice = pickVoice();
+  utt.rate = 0.76;
+  utt.pitch = selectedGender === 'female' ? 1.1 : 0.92;
+  utt.volume = getVolume();
+  document.getElementById('speakBadge').classList.add('active');
+  setSpeakingLock(true);
+  utt.onend = () => { document.getElementById('speakBadge').classList.remove('active'); setSpeakingLock(false); if (onEnd) onEnd(); };
+  utt.onerror = () => { document.getElementById('speakBadge').classList.remove('active'); setSpeakingLock(false); if (onEnd) onEnd(); };
+  synth.speak(utt);
+}
+
+function voiceTest() {
+  const sample = 'Voice test. Letter B, 69, B, 69.';
+  speak(sample);
+}
+
+function repeatLastCall() {
+  if (!lastCallPhrase) {
+    speak('No number has been called yet.');
+    return;
+  }
+  const autoOn = document.getElementById('autoToggle').checked;
+  if (autoOn) stopAutoTimer();
+  speak(lastCallPhrase, () => {
+    if (autoOn && gameStarted && allBalls.length > 0) restartAutoTimer();
+  });
+}
+
+// ── Recap button — single morphing button ──
+function setRecapBtnState(state) {
+  // state: 'recap' | 'stop' | 'disabled'
+  const btn = document.getElementById('recapBtn');
+  btn.classList.toggle('is-stopping', state === 'stop');
+  btn.disabled = state === 'disabled';
+  btn.textContent = state === 'stop' ? '\u23F9 Stop' : '\uD83D\uDD0A Recap';
+}
+
+function handleRecapBtn() {
+  if (isRecapping) {
+    stopRecap();
+  } else {
+    recapNumbers();
+  }
+}
+
+function recapNumbers() {
+  if (!calledNums.length) { speak('No numbers have been called yet.'); return; }
+
+  stopAutoTimer();
+  document.getElementById('autoToggle').checked = false;
+  updateAutoBadge();
+  updateCallBtnForAutoState();
+
+  isRecapping = true;
+  setRecapBtnState('stop');
+
+  const grouped = { B:[], I:[], N:[], G:[], O:[] };
+  calledNums.forEach(n => grouped[getCol(n)].push(n));
+  const parts = [calledNums.length + ' numbers called so far.'];
+  COLS.forEach(c => {
+    if (grouped[c].length) {
+      const s = [...grouped[c]].sort((a,b) => a - b);
+      parts.push('Letter ' + c + ': ' + s.join(', ') + '.');
+    }
+  });
+  const last = calledNums[calledNums.length - 1];
+  parts.push('Last called: Letter ' + getCol(last) + ', ' + last + '.');
+
+  let idx = 0;
+  function speakNextPart() {
+    if (!isRecapping) return;
+    if (idx >= parts.length) {
+      isRecapping = false;
+      setRecapBtnState('recap');
+      return;
+    }
+    const chunk = parts[idx++];
+    speak(chunk, () => {
+      if (!isRecapping) return;
+      // Add a small gap so letter sections do not run together.
+      setTimeout(speakNextPart, 280);
+    });
+  }
+  speakNextPart();
+}
+
+function stopRecap() {
+  if (!isRecapping) return;
+  synth.cancel();
+  isRecapping = false;
+  document.getElementById('speakBadge').classList.remove('active');
+  setRecapBtnState('recap');
+  setSpeakingLock(false);
+}
+
+// ── Auto call ──
+function updateAutoBadge() {
+  const autoOn = document.getElementById('autoToggle').checked;
+  document.getElementById('autoBadge').classList.toggle('visible', autoOn && gameStarted);
+}
+
+function updateCallBtnForAutoState() {
+  const autoOn = document.getElementById('autoToggle').checked;
+  const callBtn = document.getElementById('callBtn');
+  if (callBtn && gameStarted && allBalls.length > 0) {
+    callBtn.disabled = autoOn;
+    if (!autoOn) callBtn.textContent = 'Next \u2192';
+  }
+}
+
+document.getElementById('autoToggle').addEventListener('change', function() {
+  updateAutoBadge();
+  if (this.checked && gameStarted) {
+    updateCallBtnForAutoState();
+    callNumber(); // start immediately
+  } else {
+    stopAutoTimer();
+    updateCallBtnForAutoState();
+  }
+});
+
+function restartAutoTimer() {
+  stopAutoTimer();
+  if (!document.getElementById('autoToggle').checked) return;
+  if (synth.speaking) return;
+  const total = getIntervalSecs();
+  document.getElementById('barWrap').style.display = 'block';
+  document.getElementById('barFill').style.transition = 'none';
+  document.getElementById('barFill').style.width = '100%';
+  setTimeout(() => {
+    document.getElementById('barFill').style.transition = 'width ' + total + 's linear';
+    document.getElementById('barFill').style.width = '0%';
+  }, 30);
+  countdownInterval = setTimeout(callNumber, total * 1000);
+}
+
+function stopAutoTimer() {
+  clearTimeout(countdownInterval);
+  countdownInterval = null;
+  document.getElementById('barWrap').style.display = 'none';
+  document.getElementById('barFill').style.transition = 'none';
+  document.getElementById('barFill').style.width = '100%';
+}
+
+// ── Game flow ──
+function startGame() {
+  if (gameStarted) return;
+  gameStarted = true;
+  allBalls = shuffleSpread(Array.from({length: 75}, (_, i) => i + 1));
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('startBtn').textContent = 'Playing';
+  document.getElementById('repeatBtn').disabled = true;
+  lastCallPhrase = '';
+
+  const autoOn = document.getElementById('autoToggle').checked;
+  updateAutoBadge();
+
+  // Welcome message — then immediately start calling if auto is on
+  // Some TTS voices can clip the first word, so we intentionally repeat "Welcome".
+  speak('Welcome. Welcome to HearMe Bingo! Get your cards ready. Good luck everyone!', () => {
+    if (autoOn) {
+      callNumber();
+    } else {
+      // Enable manual controls after welcome finishes
+      document.getElementById('callBtn').disabled = false;
+      setRecapBtnState('recap');
+    }
+  });
+
+  // Enable recap immediately (even during welcome speech it's fine to show)
+  document.getElementById('recapBtn').disabled = false;
+  updateCallBtnForAutoState();
+}
+
+function callNumber() {
+  if (!gameStarted || allBalls.length === 0) return;
+
+  // Clear previous latest highlight
+  document.querySelectorAll('[class*="latest-"]').forEach(c => {
+    const num = parseInt(c.id.replace('nc-', ''));
+    c.className = 'num-cell called-' + getCol(num);
+  });
+
+  const num = allBalls.pop();
+  const col = getCol(num);
+  calledNums.push(num);
+
+  // Board cell
+  const cell = document.getElementById('nc-' + num);
+  cell.className = 'num-cell latest-' + col + ' pop';
+  setTimeout(() => cell.classList.remove('pop'), 400);
+
+  // Caller display
+  document.getElementById('callerLetter').textContent = col;
+  document.getElementById('callerLetter').style.color = COL_COLORS[col];
+  document.getElementById('callerNum').textContent = num;
+  document.getElementById('callerSub').textContent = col + '  \u2014  ' + num;
+
+  // Pulse
+  const disp = document.getElementById('callerDisplay');
+  disp.classList.remove('pulse');
+  void disp.offsetWidth;
+  disp.classList.add('pulse');
+  setTimeout(() => disp.classList.remove('pulse'), 800);
+
+  // Called numbers column
+  addCalledNumber(col, num);
+
+  // Stats
+  document.getElementById('statCalled').textContent = calledNums.length;
+  document.getElementById('statLeft').textContent = allBalls.length;
+
+  // Enable recap
+  setRecapBtnState('recap');
+
+  const lc = LETTER_CALLS[col];
+  const callPhrase = lc + ', ' + num + ', ' + col + ', ' + num + '.';
+  lastCallPhrase = callPhrase;
+  document.getElementById('repeatBtn').disabled = false;
+
+  if (allBalls.length === 0) {
+    speak(callPhrase, () => {
+      document.getElementById('callBtn').disabled = true;
+      stopAutoTimer();
+      updateAutoBadge();
+      setTimeout(() => speak('All 75 numbers have been called. Game over! Thank you for playing!'), 800);
+    });
+    return;
+  }
+
+  speak(callPhrase, () => {
+    if (document.getElementById('autoToggle').checked) restartAutoTimer();
+  });
+}
+
+// ── Called numbers — recent strip (last 10) ──
+function renderRecentStrip() {
+  const last10 = calledNums.slice(-10).reverse(); // newest first
+  const row1 = document.getElementById('recentRow1');
+  const row2 = document.getElementById('recentRow2');
+  row1.innerHTML = '';
+  row2.innerHTML = '';
+
+  last10.forEach((num, idx) => {
+    const col = getCol(num);
+    const chip = document.createElement('div');
+    const isTop = idx === 0;
+    const isNew = idx === 0 && calledNums.length > 0;
+    chip.className = 'recent-chip ' + col + (isTop ? ' top' : '') + (isNew ? ' new' : '');
+    chip.textContent = col + num;
+    if (idx < 5) row1.appendChild(chip);
+    else row2.appendChild(chip);
+  });
+
+  // Show View All button once we have numbers
+  document.getElementById('viewAllBtn').disabled = calledNums.length === 0;
+}
+
+function addCalledNumber(col, num) {
+  renderRecentStrip();
+}
+
+// ── All Numbers Modal ──
+function openAllModal() {
+  if (!calledNums.length) return;
+
+  const last = calledNums[calledNums.length - 1];
+  const grouped = { B:[], I:[], N:[], G:[], O:[] };
+  calledNums.forEach(n => grouped[getCol(n)].push(n));
+
+  COLS.forEach(c => {
+    const list = document.getElementById('mcol' + c);
+    list.innerHTML = '';
+    const sorted = [...grouped[c]].sort((a,b) => a - b);
+    sorted.forEach(n => {
+      const chip = document.createElement('div');
+      const isLatest = n === last;
+      chip.className = 'modal-chip ' + c + (isLatest ? ' latest-call' : '');
+      chip.textContent = n;
+      list.appendChild(chip);
+    });
+  });
+
+  document.getElementById('modalCount').textContent = calledNums.length + ' of 75';
+  document.getElementById('modalEmpty').style.display = calledNums.length ? 'none' : 'block';
+  document.getElementById('modalCols').style.display = calledNums.length ? 'grid' : 'none';
+  document.getElementById('allModal').classList.add('open');
+}
+
+function closeAllModal() {
+  document.getElementById('allModal').classList.remove('open');
+}
+
+function handleModalBackdropClick(e) {
+  if (e.target === document.getElementById('allModal')) closeAllModal();
+}
+
+// ── Changelog modal ──
+function openChangelog() {
+  document.getElementById('clModal').classList.add('open');
+}
+function closeChangelog() {
+  document.getElementById('clModal').classList.remove('open');
+}
+function handleClBackdrop(e) {
+  if (e.target === document.getElementById('clModal')) closeChangelog();
+}
+
+// ── Board builder ──
+function buildBoard() {
+  const board = document.getElementById('numberBoard');
+  board.innerHTML = '';
+  for (let r = 0; r < 15; r++) {
+    COLS.forEach(col => {
+      const num = COL_MIN[col] + r;
+      const cell = document.createElement('div');
+      cell.className = 'num-cell';
+      cell.id = 'nc-' + num;
+      cell.textContent = num;
+      board.appendChild(cell);
+    });
+  }
+}
+
+// ── Reset ──
+function resetGame() {
+  synth.cancel();
+  gameStarted = false;
+  allBalls = [];
+  calledNums = [];
+  lastCallPhrase = '';
+  isRecapping = false;
+  stopAutoTimer();
+  document.getElementById('autoToggle').checked = false;
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('startBtn').textContent = '\u25B6 Start';
+  document.getElementById('callBtn').disabled = true;
+  document.getElementById('callBtn').textContent = 'Next \u2192';
+  setRecapBtnState('disabled');
+  document.getElementById('speakBadge').classList.remove('active');
+  document.getElementById('callerLetter').textContent = '?';
+  document.getElementById('callerLetter').style.color = 'var(--accent)';
+  document.getElementById('callerNum').textContent = '--';
+  document.getElementById('callerSub').textContent = 'Press Start';
+  document.getElementById('statCalled').textContent = '0';
+  document.getElementById('statLeft').textContent = '75';
+  updateAutoBadge();
+  // Clear recent strip
+  document.getElementById('recentRow1').innerHTML = '';
+  document.getElementById('recentRow2').innerHTML = '';
+  document.getElementById('viewAllBtn').disabled = true;
+  document.getElementById('repeatBtn').disabled = true;
+  // Close modal if open
+  closeAllModal();
+  document.querySelectorAll('.num-cell').forEach(c => c.className = 'num-cell');
+}
+
+function confirmResetGame() {
+  if (!gameStarted && calledNums.length === 0) return;
+  if (window.confirm('Reset the current game? All called numbers will be cleared.')) {
+    resetGame();
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+buildBoard();
+</script>
+</body>
+</html>
