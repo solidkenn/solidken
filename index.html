@@ -955,10 +955,10 @@
   </ul>
   <div style="display:flex; align-items:center; gap:0.75rem;">
     <button id="mute-btn" aria-label="Toggle sound" title="Toggle hover sound" style="
-      background: none; border: 1px solid var(--border); border-radius: 4px;
-      color: var(--muted); cursor: pointer; font-size: 1rem;
-      padding: 4px 9px; transition: border-color 0.2s, color 0.2s;
-      font-family: var(--font-mono); line-height: 1;">🔊</button>
+      background: transparent; border: 1px solid rgba(245,208,0,0.4); border-radius: 4px;
+      color: var(--accent); cursor: pointer; font-size: 0.72rem;
+      padding: 5px 10px; transition: border-color 0.2s, color 0.2s, background 0.2s;
+      font-family: var(--font-mono); letter-spacing: 0.08em; line-height: 1;">🔊 SFX</button>
     <button class="hamburger" id="hamburger" aria-label="Toggle menu">
       <span></span>
       <span></span>
@@ -995,7 +995,7 @@
       <div class="section-label">// about me</div>
       <h2>The person<br/>behind the code.</h2>
       <p class="about-bio">
-	    Welcome to my website! iI you are interested in my work and hobbies feel free to browse my website.
+	    Welcome to my website! If you are interested in my work and hobbies feel free to browse my website.
 		<br/><br/>
         I'm a <strong>Developer</strong> and <strong>Systems Analyst</strong> with hands-on experience in several programming languages and designing solutions. Currently at a banking industry, I always work all-nighter keeping critical banking systems alive and running.
         <br/><br/>
@@ -1267,7 +1267,7 @@
       </div>
     </div>
 
-    <div class="project-card completed" onclick="window.open('https://solidkenn.github.io/easybook/','_blank')">
+    <div class="project-card completed">
       <div class="card-preview">
         <canvas class="preview-canvas" id="easybook-canvas"></canvas>
       </div>
@@ -1708,8 +1708,13 @@
       }
     }, 120);
 
+    const enterSound = new Audio('Audio Track.mp3');
+    enterSound.volume = 0.6;
+
     enterBtn.addEventListener('click', () => {
-      // Prime the audio on this user gesture so it plays immediately on hover
+      enterSound.currentTime = 0;
+      enterSound.play().catch(() => {});
+      // Prime the hover audio on this user gesture so it plays immediately on hover
       hoverSound.play().then(() => hoverSound.pause()).catch(() => {});
       hoverSound.currentTime = 0;
       screen.classList.add('hidden');
@@ -2043,6 +2048,22 @@
 
   document.querySelectorAll('.project-card').forEach(card => {
     card.addEventListener('mouseenter', playHoverSound);
+  });
+
+  document.querySelectorAll('.hobby-card').forEach(card => {
+    card.addEventListener('mouseenter', playHoverSound);
+  });
+
+  // ── Project button click sound ─────────────────────────────────────────
+  const projectBtnSound = new Audio('Audio Track.mp3');
+  projectBtnSound.volume = 0.5;
+
+  document.querySelectorAll('.project-card .btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (soundMuted) return;
+      projectBtnSound.currentTime = 0;
+      projectBtnSound.play().catch(() => {});
+    });
   });
 
   // Mute button toggle
