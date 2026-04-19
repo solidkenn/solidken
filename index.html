@@ -533,6 +533,14 @@
 
   .hobby-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
 
+  .hobby-card--travel { display: flex; flex-direction: column; }
+  .travel-map-btn {
+    margin-top: 1.25rem;
+    align-self: flex-start;
+    padding: 0.45rem 1rem;
+    font-size: 0.75rem;
+  }
+
   /* ── CONTACT ── */
   .contact-inner {
     display: grid;
@@ -1259,8 +1267,9 @@
       <h3>HearMe Bingo</h3>
       <p>A modern take on Bingo because shouting numbers across the room is so last century. This web app features a Caller that announces and recaps numbers clearly, making the game more accessible for everyone especially the lolas and lolos who deserve better than "WHAT NUMBER WAS THAT?!"</p>
       <div class="project-tags">
-        <span class="project-tag">JavaScript</span>
-        <span class="project-tag">Python</span>
+        <span class="project-tag">HTML5</span>
+        <span class="project-tag">CSS3</span>
+        <span class="project-tag">Javascript</span>
       </div>
       <div style="margin-top: 1.25rem;">
         <a href="https://solidkenn.github.io/solidken/hearme-bingo.html" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="font-size: 0.75rem; padding: 0.5rem 1.25rem;">▶ Test Build</a>
@@ -1337,10 +1346,11 @@
       <h3>Music</h3>
       <p>My only hobby that is not doing senseless things. Enjoying a good music and playing guitar is what I love.</p>
     </div>
-    <div class="hobby-card">
+    <div class="hobby-card hobby-card--travel">
       <span class="hobby-icon">✈️</span>
       <h3>Travel</h3>
       <p>Exploring places and cultures when I got tired in life. Yes, it's expensive. This is where my salary goes.</p>
+      <a href="travel.html" target="_blank" rel="noopener noreferrer" class="btn btn-primary travel-map-btn">Visited Places →</a>
     </div>
     <div class="hobby-card">
       <span class="hobby-icon">👓</span>
@@ -1412,6 +1422,7 @@
     Currently working on Hearme Bingo and Breakout
   </div>
 </footer>
+
 
 <script>
   // ── Hero dev illustration ─────────────────────────────────────────────
@@ -2066,6 +2077,16 @@
     });
   });
 
+  // Travel map button click sound
+  const travelMapBtn = document.querySelector('.travel-map-btn');
+  if (travelMapBtn) {
+    travelMapBtn.addEventListener('click', () => {
+      if (soundMuted) return;
+      projectBtnSound.currentTime = 0;
+      projectBtnSound.play().catch(() => {});
+    });
+  }
+
   // Mute button toggle
   const muteBtn = document.getElementById('mute-btn');
   if (muteBtn) {
@@ -2116,6 +2137,7 @@
       submitBtn.disabled = false;
     });
   }
+
 </script>
 
 </body>
