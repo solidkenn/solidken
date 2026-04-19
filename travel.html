@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Travel Log — solidkenn.exe</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/globe.gl"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0ede8;
+    --muted: #7a7a85;
+    --accent: #f5d000;
+    --accent2: #ffb800;
+    --font-display: 'Rajdhani', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    overflow: hidden;
+  }
+
+  /* ── HEADER ── */
+  .travel-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 2rem;
+    background: linear-gradient(to bottom, rgba(10,10,10,0.95) 0%, transparent 100%);
+  }
+
+  .travel-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .travel-back:hover { color: var(--accent); }
+  .travel-back svg { width: 14px; height: 14px; }
+
+  .travel-title-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .travel-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .travel-title {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text);
+  }
+
+  .travel-badge {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    background: rgba(245,208,0,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(245,208,0,0.25);
+    border-radius: 20px;
+    padding: 0.3rem 0.85rem;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+
+  /* ── HINT BAR ── */
+  .travel-hint {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    background: rgba(10,10,10,0.7);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.4rem 1.1rem;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  /* ── GLOBE ── */
+  #globe-container {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  /* ── LOADING OVERLAY ── */
+  #globe-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    background: var(--bg);
+    transition: opacity 0.5s ease;
+  }
+  #globe-loading.hidden { opacity: 0; pointer-events: none; }
+
+  .loading-dot-row { display: flex; gap: 0.5rem; }
+  .loading-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: dot-pulse 1.2s ease-in-out infinite;
+  }
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dot-pulse {
+    0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+  .loading-text {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .loader-bar-wrap {
+    width: 220px;
+    height: 2px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .loader-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #f5d000, #ffb800);
+    border-radius: 2px;
+    transition: width 0.15s ease;
+    box-shadow: 0 0 8px rgba(245,208,0,0.6);
+  }
+  .loader-percent {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+  }
+</style>
+</head>
+<body>
+
+<div id="globe-loading">
+  <div class="loading-dot-row">
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+  </div>
+  <p class="loading-text" id="loading-text">Loading map...</p>
+  <div class="loader-bar-wrap">
+    <div class="loader-bar" id="loader-bar"></div>
+  </div>
+  <p class="loader-percent" id="loader-percent">0%</p>
+</div>
+
+<header class="travel-header">
+  <a href="index.html" class="travel-back">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 2L4 7l5 5"/>
+    </svg>
+    back
+  </a>
+  <div class="travel-title-group">
+    <span class="travel-label">// travel log</span>
+    <span class="travel-title">Where I've been</span>
+  </div>
+  <span class="travel-badge">9 countries visited</span>
+</header>
+
+<div id="globe-container"></div>
+
+<p class="travel-hint">Click &amp; drag to rotate &nbsp;·&nbsp; Scroll to zoom</p>
+
+<script>
+  const VISITED = ['SG','HK','MY','KR','GB','AU','CA','AE','PH'];
+  const loading   = document.getElementById('globe-loading');
+  const container = document.getElementById('globe-container');
+
+  const loaderBar     = document.getElementById('loader-bar');
+  const loaderPercent = document.getElementById('loader-percent');
+  const loadingText   = document.getElementById('loading-text');
+
+  function setProgress(pct) {
+    loaderBar.style.width = pct + '%';
+    loaderPercent.textContent = Math.round(pct) + '%';
+    if (pct >= 100) loadingText.textContent = 'Building globe...';
+  }
+
+  fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson')
+    .then(res => {
+      const total = +res.headers.get('Content-Length');
+      const reader = res.body.getReader();
+      const chunks = [];
+      let loaded = 0;
+
+      function pump() {
+        return reader.read().then(({ done, value }) => {
+          if (done) return;
+          chunks.push(value);
+          loaded += value.length;
+          const pct = total ? (loaded / total) * 100 : 0;
+          setProgress(Math.min(pct, 99));
+          return pump();
+        });
+      }
+
+      return pump().then(() => {
+        setProgress(100);
+        const blob = new Blob(chunks);
+        return blob.text();
+      }).then(text => JSON.parse(text));
+    })
+    .then(world => {
+      const globe = Globe()
+        .width(window.innerWidth)
+        .height(window.innerHeight)
+        .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-dark.jpg')
+        .backgroundImageUrl(null)
+        .backgroundColor('#0a0a0a')
+        .polygonsData(world.features)
+        .polygonAltitude(0.005)
+        .polygonCapColor(d => VISITED.includes(d.properties.ISO_A2) ? '#f5d000' : 'rgba(255,255,255,0.04)')
+        .polygonSideColor(() => 'rgba(255,255,255,0.02)')
+        .polygonStrokeColor(() => 'rgba(255,255,255,0.06)')
+        .polygonLabel(d => VISITED.includes(d.properties.ISO_A2)
+          ? `<div style="font-family:'DM Mono',monospace;font-size:0.75rem;background:#1a1a1a;border:1px solid rgba(245,208,0,0.4);color:#f5d000;padding:0.3rem 0.6rem;border-radius:4px;">${d.properties.NAME}</div>`
+          : '')
+        .pointOfView({ lat: 20, lng: 80, altitude: 2.5 })
+        (container);
+
+      globe.controls().autoRotate = true;
+      globe.controls().autoRotateSpeed = 0.5;
+      globe.controls().enableZoom = true;
+
+      // Pause auto-rotate on drag, resume after 3s idle
+      let idleTimer;
+      container.addEventListener('pointerdown', () => {
+        globe.controls().autoRotate = false;
+        clearTimeout(idleTimer);
+      });
+      container.addEventListener('pointerup', () => {
+        idleTimer = setTimeout(() => { globe.controls().autoRotate = true; }, 3000);
+      });
+
+      window.addEventListener('resize', () => {
+        globe.width(window.innerWidth).height(window.innerHeight);
+      });
+
+      loading.classList.add('hidden');
+    })
+    .catch(() => {
+      loading.innerHTML = '<p style="font-family:\'DM Mono\',monospace;font-size:0.8rem;color:#7a7a85;">Could not load map. Check your connection.</p>';
+    });
+</script>
+</body>
+</html>
