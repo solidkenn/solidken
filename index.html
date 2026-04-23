@@ -504,41 +504,338 @@
     border: 1px solid var(--border);
   }
 
-  /* ── HOBBIES ── */
-  .hobbies-grid {
+  /* ── HOBBIES (Tab Panel) ── */
+  .hobbies-tabs {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+    grid-template-columns: 210px 1fr;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    min-height: 300px;
+    width: 100%;
   }
 
-  .hobby-card {
+  .hobbies-tab-list {
+    display: flex;
+    flex-direction: column;
     background: var(--bg2);
-    border: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+
+  .hobby-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    text-align: left;
+    transition: background 0.2s, color 0.2s, border-left-color 0.2s;
+    border-left: 2px solid transparent;
+    position: relative;
+  }
+
+  .hobby-tab:last-child { border-bottom: none; }
+
+  .hobby-tab:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.03);
+  }
+
+  .hobby-tab.active {
+    color: var(--accent);
+    background: rgba(245,208,0,0.05);
+    border-left-color: var(--accent);
+  }
+
+  .hobby-tab-icon { font-size: 1.1rem; flex-shrink: 0; }
+  .hobby-tab-name { flex: 1; }
+
+  .hobby-tab-arrow {
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.2s, transform 0.2s;
+    color: var(--accent);
+    font-size: 0.75rem;
+  }
+
+  .hobby-tab.active .hobby-tab-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .hobbies-panel-wrap {
+    background: var(--bg);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hobby-panel {
+    display: none;
+    animation: hobbyFadeIn 0.3s ease forwards;
+  }
+
+  .hobby-panel.active { display: block; }
+
+  @keyframes hobbyFadeIn {
+    from { opacity: 0; transform: translateX(14px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .hobby-panel-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 1rem;
+    line-height: 1;
+  }
+
+  .hobby-panel h3 {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 0.75rem;
+  }
+
+  .hobby-panel p {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  .tech-specs-layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    align-items: flex-start;
+    margin-top: 1.5rem;
+  }
+
+  .tech-specs-col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tech-specs-col .pc-specs {
+    margin-top: 0;
+  }
+
+  .pc-specs-title {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .pc-specs {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    width: fit-content;
+  }
+
+  .pc-spec-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.55rem 0.75rem;
     border-radius: 8px;
-    padding: 1.5rem;
+    background: var(--card-bg, rgba(255,255,255,0.03));
+    border: 1px solid var(--border, rgba(255,255,255,0.07));
     transition: border-color 0.2s;
   }
 
-  .hobby-card:hover { border-color: rgba(255,184,0,0.3); }
-
-  .hobby-icon { font-size: 1.5rem; margin-bottom: 0.75rem; display: block; }
-
-  .hobby-card h3 {
-    font-family: var(--font-display);
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--accent2);
-    margin-bottom: 0.4rem;
+  .pc-spec-row:hover {
+    border-color: var(--accent2, #7f5af0);
   }
 
-  .hobby-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+  .pc-spec-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent2);
+    min-width: 7rem;
+    flex-shrink: 0;
+  }
 
-  .hobby-card--travel { display: flex; flex-direction: column; }
-  .travel-map-btn {
+  .pc-spec-value {
+    font-size: 0.85rem;
+    color: var(--fg, #fffffe);
+    line-height: 1.4;
+  }
+
+  .gaming-add-me {
     margin-top: 1.25rem;
-    align-self: flex-start;
-    padding: 0.45rem 1rem;
-    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .hobby-coming-soon {
+    margin-top: 2rem;
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent2);
+    opacity: 0.25;
+    letter-spacing: 0.05em;
+  }
+
+  .travel-stats-title {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--fg, #fffffe);
+  }
+
+  .travel-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    width: fit-content;
+    min-width: 16rem;
+  }
+
+  .travel-stat-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .travel-stat-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .travel-stat-dots {
+    flex: 1;
+    border-bottom: 2px dotted rgba(255,255,255,0.15);
+    margin-bottom: 0.2rem;
+  }
+
+  .travel-stat-number {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent2);
+    white-space: nowrap;
+  }
+
+  .travel-map-btn {
+    margin-top: 1.5rem;
+    display: inline-block;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.78rem;
+  }
+
+  .gaming-ids {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .gaming-id-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+
+  .gaming-id-platform {
+    color: var(--muted);
+    min-width: 100px;
+    flex-shrink: 0;
+  }
+
+  .gaming-id-platform::after {
+    content: '›';
+    margin-left: 0.4rem;
+    color: var(--accent);
+  }
+
+  .gaming-id-value {
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  .gaming-id-copy {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 0.15rem 0.3rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .gaming-id-copy:hover {
+    color: var(--accent);
+    background: rgba(245,208,0,0.08);
+  }
+
+  .gaming-id-copy.copied {
+    color: #28c864;
+  }
+
+  .gaming-id-copy svg {
+    width: 13px;
+    height: 13px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: opacity 0.15s;
+  }
+
+  .gaming-typewriter {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  .gaming-typewriter::before {
+    content: '> ';
+    color: var(--accent);
+  }
+
+  .gaming-typewriter::after {
+    content: '▋';
+    color: var(--accent);
+    animation: blink 1s step-end infinite;
+    margin-left: 1px;
+  }
+
+  .gaming-typewriter.done::after {
+    animation: blink 1s step-end infinite;
   }
 
   /* ── CONTACT ── */
@@ -762,14 +1059,20 @@
     section { padding: 3rem 1.25rem; }
     .about-grid { grid-template-columns: 1fr; gap: 2rem; }
     .projects-grid { grid-template-columns: 1fr; }
-    .hobbies-grid { grid-template-columns: repeat(2, 1fr); }
+    .hobbies-tabs { grid-template-columns: 1fr; }
+    .hobbies-tab-list { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--border); }
+    .hobby-tab { flex-direction: column; gap: 0.3rem; padding: 0.75rem 1rem; border-bottom: none; border-left: none; border-top: 2px solid transparent; border-right: 1px solid var(--border); font-size: 0.72rem; white-space: nowrap; flex-shrink: 0; }
+    .hobby-tab:last-child { border-right: none; }
+    .hobby-tab.active { border-left-color: transparent; border-top-color: var(--accent); }
+    .hobby-tab-arrow { display: none; }
+    .hobbies-panel-wrap { padding: 1.75rem; }
     .contact-inner { grid-template-columns: 1fr; gap: 2rem; }
     footer { flex-direction: column; gap: 0.75rem; text-align: center; padding: 1.5rem 1.25rem; }
   }
 
   /* SMALL MOBILE */
   @media (max-width: 480px) {
-    .hobbies-grid { grid-template-columns: 1fr; }
+    .hobbies-panel-wrap { padding: 1.25rem; }
     .hero-cta .btn { width: 100%; }
     .nav-logo { font-size: 1rem; }
     .hero-photo { width: 160px !important; height: 160px !important; }
@@ -986,7 +1289,7 @@
       </p>
       <div class="hero-cta">
         <a href="#projects" class="btn btn-primary">View my work →</a>
-        <a href="#contact" class="btn btn-outline">Get in touch</a>
+        <a href="#contact" class="btn btn-outline">Hire Me</a>
       </div>
     </div>
     <!-- Animated dev illustration -->
@@ -1005,7 +1308,9 @@
       <p class="about-bio">
 	    Welcome to my website! If you are interested in my work and hobbies feel free to browse my website.
 		<br/><br/>
-        I'm a <strong>Developer</strong> and <strong>Systems Analyst</strong> with hands-on experience in several programming languages and designing solutions. Currently at a banking industry, I always work all-nighter keeping critical banking systems alive and running.
+        I'm a <strong>Software Engineer</strong> and <strong>Systems Analyst</strong> with hands-on experience in several programming languages and designing solutions. Currently at a banking industry, I always work all-nighter keeping critical banking systems alive and running.
+        <br/><br/>
+        I’m also a <strong>Freelance Web developer</strong> with experience building and managing web applications and websites. Available for projects to help bring your ideas to life and keep your web presence running smoothly.
         <br/><br/>
         I enjoy solving the kind of problems that most people don't even realize are problems. It's like a famous meme said:
 		<br/>
@@ -1330,33 +1635,186 @@
   <div class="section-label">// beyond the terminal</div>
   <h2>When I'm not<br/>debugging.</h2>
   <p class="section-intro">This is what I do outside work.</p>
-  <div class="hobbies-grid fade-in">
-    <div class="hobby-card">
-      <span class="hobby-icon">🎮</span>
-      <h3>Gaming</h3>
-      <p>Playing Competitive FPS, JRPG, Action-Adventure and Platformers to get more stressful and look older.</p>
+  <div class="hobbies-tabs fade-in">
+
+    <div class="hobbies-tab-list" role="tablist">
+      <button class="hobby-tab active" data-tab="gaming" role="tab" aria-selected="true" aria-controls="panel-gaming">
+        <span class="hobby-tab-icon">🎮</span>
+        <span class="hobby-tab-name">Gaming</span>
+        <span class="hobby-tab-arrow">→</span>
+      </button>
+      <button class="hobby-tab" data-tab="tech" role="tab" aria-selected="false" aria-controls="panel-tech">
+        <span class="hobby-tab-icon">🖥️</span>
+        <span class="hobby-tab-name">Tech</span>
+        <span class="hobby-tab-arrow">→</span>
+      </button>
+      <button class="hobby-tab" data-tab="music" role="tab" aria-selected="false" aria-controls="panel-music">
+        <span class="hobby-tab-icon">🎸</span>
+        <span class="hobby-tab-name">Music</span>
+        <span class="hobby-tab-arrow">→</span>
+      </button>
+      <button class="hobby-tab" data-tab="travel" role="tab" aria-selected="false" aria-controls="panel-travel">
+        <span class="hobby-tab-icon">✈️</span>
+        <span class="hobby-tab-name">Travel</span>
+        <span class="hobby-tab-arrow">→</span>
+      </button>
+      <button class="hobby-tab" data-tab="geek" role="tab" aria-selected="false" aria-controls="panel-geek">
+        <span class="hobby-tab-icon">👓</span>
+        <span class="hobby-tab-name">Geek Stuff</span>
+        <span class="hobby-tab-arrow">→</span>
+      </button>
     </div>
-    <div class="hobby-card">
-      <span class="hobby-icon">🖥️</span>
-      <h3>Tech</h3>
-      <p>Buying some shiny techs to be used in 'work' but end up using in other foolish things.</p>
+
+    <div class="hobbies-panel-wrap">
+      <div class="hobby-panel active" id="panel-gaming" role="tabpanel">
+        <span class="hobby-panel-icon">🎮</span>
+        <h3>Gaming</h3>
+        <p class="gaming-typewriter" id="gaming-typewriter-text" data-text="Playing Competitive FPS, JRPG, Action-Adventure and Platformers to get more stressful and look older."></p>
+        <p class="gaming-add-me">Add me up in any platforms:</p>
+        <div class="gaming-ids">
+          <div class="gaming-id-row">
+            <span class="gaming-id-platform">Steam</span>
+            <span class="gaming-id-value">373132949</span>
+            <button class="gaming-id-copy" data-copy="373132949" title="Copy Steam ID">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+          <div class="gaming-id-row">
+            <span class="gaming-id-platform">Battle.net</span>
+            <span class="gaming-id-value">solidken#11107</span>
+            <button class="gaming-id-copy" data-copy="solidken#11107" title="Copy Battle.net ID">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+          <div class="gaming-id-row">
+            <span class="gaming-id-platform">PSN</span>
+            <span class="gaming-id-value">superproxy99</span>
+            <button class="gaming-id-copy" data-copy="superproxy99" title="Copy PSN ID">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+          <div class="gaming-id-row">
+            <span class="gaming-id-platform">Epic Games</span>
+            <span class="gaming-id-value">solidken99</span>
+            <button class="gaming-id-copy" data-copy="solidken99" title="Copy Epic Games ID">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+          <div class="gaming-id-row">
+            <span class="gaming-id-platform">Riot</span>
+            <span class="gaming-id-value">Solidken #KSS <span style="color:var(--muted);font-size:0.72rem;">(Valorant)</span></span>
+            <button class="gaming-id-copy" data-copy="Solidken #KSS" title="Copy Riot ID">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+          <div class="gaming-id-row">
+            <span class="gaming-id-platform">Xbox</span>
+            <span class="gaming-id-value">solidken99</span>
+            <button class="gaming-id-copy" data-copy="solidken99" title="Copy Xbox Gamertag">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="hobby-panel" id="panel-tech" role="tabpanel">
+        <span class="hobby-panel-icon">🖥️</span>
+        <h3>Tech</h3>
+        <p class="gaming-typewriter" id="tech-typewriter-text" data-text="Buying some shiny techs to be used in 'work' but end up using in other foolish things."></p>
+        <div class="tech-specs-layout">
+          <div class="tech-specs-col">
+            <p class="pc-specs-title">Current PC Specs:</p>
+            <div class="pc-specs">
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">CPU</span>
+                <span class="pc-spec-value">AMD Ryzen 7 5800X3D</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">GPU</span>
+                <span class="pc-spec-value">Gigabyte RTX 5080 Gaming OC 16GB</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">Motherboard</span>
+                <span class="pc-spec-value">Gigabyte B450 Aorus Elite</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">RAM</span>
+                <span class="pc-spec-value">32GB G.Skill Ripjaws V 3600MHz DDR4</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">Storage</span>
+                <span class="pc-spec-value">1TB Lexar NVMe N620 M.2</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">Storage 2</span>
+                <span class="pc-spec-value">1TB WD Blue HDD</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">PSU</span>
+                <span class="pc-spec-value">Seasonic Core GX 850W V2</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">AIO Cooler</span>
+                <span class="pc-spec-value">Thermalright Aqua Elite 360</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">Case Fans</span>
+                <span class="pc-spec-value">Arctic P12 Pro</span>
+              </div>
+            </div>
+          </div>
+          <div class="tech-specs-col">
+            <p class="pc-specs-title">Gaming Platforms:</p>
+            <div class="pc-specs">
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">Console</span>
+                <span class="pc-spec-value">Playstation 5</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">Console</span>
+                <span class="pc-spec-value">Nintendo Switch</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hobby-panel" id="panel-music" role="tabpanel">
+        <span class="hobby-panel-icon">🎸</span>
+        <h3>Music</h3>
+        <p>My only hobby that is not doing senseless things. Enjoying a good music and playing guitar is what I love.</p>
+        <p class="hobby-coming-soon">Coming Soon</p>
+      </div>
+      <div class="hobby-panel" id="panel-travel" role="tabpanel">
+        <span class="hobby-panel-icon">✈️</span>
+        <h3>Travel</h3>
+        <p class="gaming-typewriter" id="travel-typewriter-text" data-text="Exploring the world one trip at a time. Costly? Yes. Worth it? Absolutely. Check out my visited places for more details."></p>
+        <p class="travel-stats-title">Travel Stats:</p>
+        <div class="travel-stats">
+          <div class="travel-stat-row">
+            <span class="travel-stat-label">Countries</span>
+            <span class="travel-stat-dots"></span>
+            <span class="travel-stat-number">9</span>
+          </div>
+          <div class="travel-stat-row">
+            <span class="travel-stat-label">Cities</span>
+            <span class="travel-stat-dots"></span>
+            <span class="travel-stat-number">17</span>
+          </div>
+          <div class="travel-stat-row">
+            <span class="travel-stat-label">Continents</span>
+            <span class="travel-stat-dots"></span>
+            <span class="travel-stat-number">4</span>
+          </div>
+        </div>
+        <a href="travel.html" target="_blank" rel="noopener noreferrer" class="btn btn-primary travel-map-btn">Visited Places →</a>
+      </div>
+      <div class="hobby-panel" id="panel-geek" role="tabpanel">
+        <span class="hobby-panel-icon">👓</span>
+        <h3>Geek Stuff</h3>
+        <p>Collecting some nonsense things that is eyecandy to some people. It's not expensive!</p>
+        <p class="hobby-coming-soon">Coming Soon</p>
+      </div>
     </div>
-    <div class="hobby-card">
-      <span class="hobby-icon">🎸</span>
-      <h3>Music</h3>
-      <p>My only hobby that is not doing senseless things. Enjoying a good music and playing guitar is what I love.</p>
-    </div>
-    <div class="hobby-card hobby-card--travel">
-      <span class="hobby-icon">✈️</span>
-      <h3>Travel</h3>
-      <p>Exploring places and cultures when I got tired in life. Yes, it's expensive. This is where my salary goes.</p>
-      <a href="travel.html" target="_blank" rel="noopener noreferrer" class="btn btn-primary travel-map-btn">Visited Places →</a>
-    </div>
-    <div class="hobby-card">
-      <span class="hobby-icon">👓</span>
-      <h3>Geek Stuff</h3>
-      <p>Collecting some nonsense things that is eyecandy to some people. It's not expensive!</p>
-    </div>
+
   </div>
 </section>
 
@@ -2061,8 +2519,160 @@
     card.addEventListener('mouseenter', playHoverSound);
   });
 
-  document.querySelectorAll('.hobby-card').forEach(card => {
-    card.addEventListener('mouseenter', playHoverSound);
+  // ── Hobby Tab Panel ──────────────────────────────────────────────────────
+  const hobbyTabs   = document.querySelectorAll('.hobby-tab');
+  const hobbyPanels = document.querySelectorAll('.hobby-panel');
+
+  hobbyTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      hobbyTabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+      hobbyPanels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+      playHoverSound();
+    });
+  });
+
+  // ── Gaming panel typewriter ───────────────────────────────────────────
+  const typewriterEl = document.getElementById('gaming-typewriter-text');
+  const typewriterText = typewriterEl ? typewriterEl.dataset.text : '';
+  let typewriterTimer = null;
+  let typewriterDone = false;
+
+  function runTypewriter() {
+    if (!typewriterEl || typewriterDone) return;
+    typewriterEl.textContent = '';
+    typewriterEl.classList.remove('done');
+    let i = 0;
+    clearInterval(typewriterTimer);
+    typewriterTimer = setInterval(() => {
+      typewriterEl.textContent += typewriterText[i];
+      i++;
+      if (i >= typewriterText.length) {
+        clearInterval(typewriterTimer);
+        typewriterEl.classList.add('done');
+        typewriterDone = true;
+      }
+    }, 28);
+  }
+
+  // Run on page load since Gaming is the default active tab
+  runTypewriter();
+
+  // Re-run whenever the Gaming tab is clicked
+  const gamingTab = document.querySelector('.hobby-tab[data-tab="gaming"]');
+  if (gamingTab) {
+    gamingTab.addEventListener('click', () => {
+      typewriterDone = false;
+      runTypewriter();
+    });
+  }
+
+  // ── Tech panel typewriter ─────────────────────────────────────────────
+  const techTypewriterEl = document.getElementById('tech-typewriter-text');
+  const techTypewriterText = techTypewriterEl ? techTypewriterEl.dataset.text : '';
+  let techTypewriterTimer = null;
+  let techTypewriterDone = false;
+
+  function runTechTypewriter() {
+    if (!techTypewriterEl || techTypewriterDone) return;
+    techTypewriterEl.textContent = '';
+    techTypewriterEl.classList.remove('done');
+    let i = 0;
+    clearInterval(techTypewriterTimer);
+    techTypewriterTimer = setInterval(() => {
+      techTypewriterEl.textContent += techTypewriterText[i];
+      i++;
+      if (i >= techTypewriterText.length) {
+        clearInterval(techTypewriterTimer);
+        techTypewriterEl.classList.add('done');
+        techTypewriterDone = true;
+      }
+    }, 28);
+  }
+
+  const techTab = document.querySelector('.hobby-tab[data-tab="tech"]');
+  if (techTab) {
+    techTab.addEventListener('click', () => {
+      techTypewriterDone = false;
+      runTechTypewriter();
+    });
+  }
+
+  // ── Travel panel typewriter ───────────────────────────────────────────
+  const travelTypewriterEl = document.getElementById('travel-typewriter-text');
+  const travelTypewriterText = travelTypewriterEl ? travelTypewriterEl.dataset.text : '';
+  let travelTypewriterTimer = null;
+  let travelTypewriterDone = false;
+
+  function runTravelTypewriter() {
+    if (!travelTypewriterEl || travelTypewriterDone) return;
+    travelTypewriterEl.textContent = '';
+    travelTypewriterEl.classList.remove('done');
+    let i = 0;
+    clearInterval(travelTypewriterTimer);
+    travelTypewriterTimer = setInterval(() => {
+      travelTypewriterEl.textContent += travelTypewriterText[i];
+      i++;
+      if (i >= travelTypewriterText.length) {
+        clearInterval(travelTypewriterTimer);
+        travelTypewriterEl.classList.add('done');
+        travelTypewriterDone = true;
+      }
+    }, 28);
+  }
+
+  // ── Travel stat number slot-machine animation ─────────────────────────
+  const travelStatTargets = [9, 17, 4];
+
+  function animateTravelStats() {
+    const statEls = document.querySelectorAll('#panel-travel .travel-stat-number');
+    statEls.forEach((el, idx) => {
+      const target = travelStatTargets[idx];
+      const duration = 900;
+      const interval = 50;
+      const steps = duration / interval;
+      let step = 0;
+
+      el.textContent = Math.floor(Math.random() * 20);
+
+      const timer = setInterval(() => {
+        step++;
+        const progress = step / steps;
+        if (progress >= 1) {
+          clearInterval(timer);
+          el.textContent = target;
+        } else {
+          const max = Math.max(target + 10, 20);
+          el.textContent = Math.floor(Math.random() * max);
+        }
+      }, interval + idx * 60);
+    });
+  }
+
+  const travelTab = document.querySelector('.hobby-tab[data-tab="travel"]');
+  if (travelTab) {
+    travelTab.addEventListener('click', () => {
+      travelTypewriterDone = false;
+      runTravelTypewriter();
+      animateTravelStats();
+    });
+  }
+
+  // ── Gaming ID copy buttons ────────────────────────────────────────────
+  document.querySelectorAll('.gaming-id-copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const text = btn.dataset.copy;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg>';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+        }, 1800);
+      }).catch(() => {});
+    });
   });
 
   // ── Project button click sound ─────────────────────────────────────────
