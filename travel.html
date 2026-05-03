@@ -3,15 +3,90 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Travel Log — solidkenn.exe</title>
+<title>solidkenn.exe</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-<script src="https://unpkg.com/globe.gl"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── LOADING SCREEN ── */
+  #loading-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #0a0a0a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  }
+
+  #loading-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .loader-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .loader-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    letter-spacing: -0.03em;
+    color: #f5d000;
+  }
+
+  .loader-asterisk {
+    display: inline-block;
+    animation: loader-flip3d 1.2s ease-in-out infinite;
+  }
+
+  @keyframes loader-flip3d {
+    0%   { transform: rotateY(0deg); }
+    50%  { transform: rotateY(180deg); }
+    100% { transform: rotateY(360deg); }
+  }
+
+  .loader-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+  }
+
+  .loader-bar-wrap {
+    width: 220px;
+    height: 2px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .loader-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #f5d000, #ffb800);
+    border-radius: 2px;
+    transition: width 0.1s ease;
+    box-shadow: 0 0 8px rgba(245,208,0,0.6);
+  }
+
+  .loader-percent {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: #f5d000;
+    letter-spacing: 0.08em;
+  }
 
   :root {
     --bg: #0a0a0a;
     --bg2: #111111;
+    --bg3: #1a1a1a;
     --border: rgba(255,255,255,0.08);
     --text: #f0ede8;
     --muted: #7a7a85;
@@ -22,273 +97,2760 @@
     --font-mono: 'DM Mono', monospace;
   }
 
-  html, body {
-    height: 100%;
+  html { scroll-behavior: smooth; }
+
+  body {
     background: var(--bg);
     color: var(--text);
     font-family: var(--font-body);
-    overflow: hidden;
+    font-size: 16px;
+    line-height: 1.7;
+    min-height: 100vh;
   }
 
-  /* ── HEADER ── */
-  .travel-header {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 10;
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.1rem 2rem;
-    background: linear-gradient(to bottom, rgba(10,10,10,0.95) 0%, transparent 100%);
+    padding: 1rem 2.5rem;
+    background: rgba(10,10,10,0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
   }
 
-  .travel-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+  .nav-logo {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.65rem;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+  }
+
+  .logo-asterisk {
+    display: inline-block;
+    animation: flip3d 2.5s ease-in-out infinite;
+  }
+
+  @keyframes flip3d {
+    0%   { transform: rotateY(0deg); }
+    50%  { transform: rotateY(180deg); }
+    100% { transform: rotateY(360deg); }
+  }
+
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+
+  .nav-links a {
     font-family: var(--font-mono);
     font-size: 0.78rem;
-    letter-spacing: 0.08em;
     color: var(--muted);
     text-decoration: none;
+    letter-spacing: 0.05em;
     transition: color 0.2s;
   }
-  .travel-back:hover { color: var(--accent); }
-  .travel-back svg { width: 14px; height: 14px; }
 
-  .travel-title-group {
+  .nav-links a:hover { color: var(--text); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 90vh;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
+    justify-content: center;
+    padding: 4rem 2.5rem;
+    position: relative;
+    overflow: hidden;
   }
 
-  .travel-label {
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -120px;
+    right: -80px;
+    width: 520px;
+    height: 520px;
+    background: radial-gradient(circle, rgba(245,208,0,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-tag {
     font-family: var(--font-mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.14em;
-    color: var(--muted);
+    font-size: 0.78rem;
+    color: var(--accent);
+    letter-spacing: 0.12em;
     text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
-  .travel-title {
+  .hero-tag::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
     font-family: var(--font-display);
-    font-size: 1.35rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    color: var(--text);
+    font-size: clamp(3.5rem, 9vw, 7.5rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
   }
 
-  .travel-badge {
+  h1 span { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 1.25rem;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+  .btn {
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    padding: 0.75rem 1.75rem;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary { background: var(--accent); color: #0a0a0a; font-weight: 500; }
+  .btn-primary:hover { background: #ffe033; }
+
+  .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-outline:hover { border-color: rgba(255,255,255,0.25); }
+
+  /* ── SECTIONS ── */
+  section {
+    padding: 5rem 2.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin-bottom: 1rem;
+  }
+
+  .section-intro {
+    color: var(--muted);
+    max-width: 560px;
+    margin-bottom: 3rem;
+    font-size: 1.1rem;
+  }
+
+  /* ── HERO ILLUSTRATION ── */
+  .hero-illustration {
+    flex-shrink: 0;
+    width: 520px;
+    height: 420px;
+    position: relative;
+  }
+
+  .hero-illustration canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  @media (max-width: 1024px) {
+    .hero-illustration { width: 400px; height: 325px; }
+  }
+
+  @media (max-width: 768px) {
+    .hero-illustration { width: 100%; height: 240px; }
+  }
+
+  /* ── ABOUT ── */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .about-bio { color: var(--muted); line-height: 1.9; }
+  .about-bio strong { color: var(--text); font-weight: 500; }
+
+  .skills-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1.5rem; }
+
+  .skill-tag {
+    font-family: var(--font-mono);
+    font-size: 0.73rem;
+    padding: 4px 12px;
+    border-radius: 3px;
+    background: var(--bg3);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    letter-spacing: 0.04em;
+  }
+
+  .skill-tag.highlight {
     background: rgba(245,208,0,0.1);
     color: var(--accent);
-    border: 1px solid rgba(245,208,0,0.25);
-    border-radius: 20px;
-    padding: 0.3rem 0.85rem;
-    letter-spacing: 0.06em;
-    white-space: nowrap;
+    border-color: rgba(245,208,0,0.25);
   }
 
-  /* ── HINT BAR ── */
-  .travel-hint {
-    position: fixed;
-    bottom: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
+  /* ── TERMINAL STATS ── */
+  .terminal-box {
+    background: #0d0d0d;
+    border: 1px solid rgba(245,208,0,0.2);
+    border-radius: 8px;
+    overflow: hidden;
     font-family: var(--font-mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    background: rgba(10,10,10,0.7);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 0.4rem 1.1rem;
-    pointer-events: none;
-    white-space: nowrap;
+    box-shadow: 0 0 32px rgba(245,208,0,0.05);
   }
 
-  /* ── GLOBE ── */
-  #globe-container {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
+  .terminal-titlebar {
+    background: #1a1a1a;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 0.6rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
 
-  /* ── LOADING OVERLAY ── */
-  #globe-loading {
-    position: fixed;
-    inset: 0;
-    z-index: 5;
+  .term-dot {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .term-red    { background: #ff5f57; }
+  .term-yellow { background: #febc2e; }
+  .term-green  { background: #28c840; }
+
+  .terminal-title {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 0.06em;
+    margin-left: 8px;
+  }
+
+  .terminal-body {
+    padding: 1.25rem 1.5rem 1.5rem;
     display: flex;
     flex-direction: column;
+    gap: 0.35rem;
+    min-height: 200px;
+  }
+
+  .term-line {
+    font-size: 0.82rem;
+    line-height: 1.7;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .term-prompt { color: var(--accent); user-select: none; }
+  .term-cmd    { color: #e0e0e0; }
+  .term-comment { color: rgba(255,255,255,0.25); font-size: 0.75rem; }
+  .term-arrow  { color: rgba(255,255,255,0.25); }
+
+  .term-key {
+    color: #7dd3fc;
+    min-width: 150px;
+    display: inline-block;
+  }
+
+  .term-val {
+    font-size: 1.85rem;
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .term-unit { color: rgba(255,255,255,0.35); font-size: 0.75rem; }
+
+  .term-sub {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.3);
+    padding-left: 1rem;
+    margin-bottom: 0.5rem;
+    border-left: 2px solid rgba(245,208,0,0.15);
+    margin-left: 0.25rem;
+  }
+
+  .term-success { color: #28c864; font-size: 0.8rem; margin-top: 0.25rem; }
+
+  .term-caret {
+    color: var(--accent);
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+
+  .term-output { display: flex; flex-direction: column; gap: 0; }
+
+  /* ── PROJECTS ── */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .project-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+    cursor: pointer;
+  }
+
+  .project-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 10%; bottom: 10%;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
+    transform: scaleY(0);
+    transition: transform 0.25s ease;
+  }
+
+  .project-card:hover::before {
+    transform: scaleY(1);
+  }
+
+  .project-card:hover {
+    border-color: rgba(245,208,0,0.4);
+    transform: translateY(-6px);
+    box-shadow: 0 14px 36px rgba(245,208,0,0.09), 0 4px 14px rgba(0,0,0,0.45);
+  }
+
+  .project-card:hover h3 {
+    color: var(--accent);
+  }
+
+  .project-card:hover .project-tags {
+    transform: translateY(-2px);
+  }
+
+  .project-number {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+  }
+
+  .project-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    color: var(--text);
+    transition: color 0.25s;
+  }
+
+  .project-card p {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.65;
+    margin-bottom: 1.25rem;
+  }
+
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    transition: transform 0.25s ease;
+  }
+
+  .project-tag {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    padding: 2px 8px;
+    border-radius: 2px;
+    background: var(--bg3);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  /* ── HOBBIES (Tab Panel) ── */
+  .hobbies-tabs {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    min-height: 300px;
+    width: 100%;
+  }
+
+  .hobbies-tab-list {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+  }
+
+  .hobby-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    text-align: left;
+    transition: background 0.2s, color 0.2s, border-left-color 0.2s;
+    border-left: 2px solid transparent;
+    position: relative;
+  }
+
+  .hobby-tab:last-child { border-bottom: none; }
+
+  .hobby-tab:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.03);
+  }
+
+  .hobby-tab.active {
+    color: var(--accent);
+    background: rgba(245,208,0,0.05);
+    border-left-color: var(--accent);
+  }
+
+  .hobby-tab-icon { font-size: 1.1rem; flex-shrink: 0; }
+  .hobby-tab-name { flex: 1; }
+
+  .hobby-tab-arrow {
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.2s, transform 0.2s;
+    color: var(--accent);
+    font-size: 0.75rem;
+  }
+
+  .hobby-tab.active .hobby-tab-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .hobbies-panel-wrap {
+    background: var(--bg);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hobby-panel {
+    display: none;
+    animation: hobbyFadeIn 0.3s ease forwards;
+  }
+
+  .hobby-panel.active { display: block; }
+
+  @keyframes hobbyFadeIn {
+    from { opacity: 0; transform: translateX(14px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .hobby-panel-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 1rem;
+    line-height: 1;
+  }
+
+  .hobby-panel h3 {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 0.75rem;
+  }
+
+  .hobby-panel p {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  .tech-specs-layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    align-items: flex-start;
+    margin-top: 1.5rem;
+  }
+
+  .tech-specs-col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tech-specs-col .pc-specs {
+    margin-top: 0;
+  }
+
+  .pc-specs-title {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .pc-specs {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    width: fit-content;
+  }
+
+  .pc-spec-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 8px;
+    background: var(--card-bg, rgba(255,255,255,0.03));
+    border: 1px solid var(--border, rgba(255,255,255,0.07));
+    transition: border-color 0.2s;
+  }
+
+  .pc-spec-row:hover {
+    border-color: var(--accent2, #7f5af0);
+  }
+
+  .pc-spec-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent2);
+    min-width: 7rem;
+    flex-shrink: 0;
+  }
+
+  .pc-spec-value {
+    font-size: 0.85rem;
+    color: var(--fg, #fffffe);
+    line-height: 1.4;
+  }
+
+  .gaming-add-me {
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .hobby-coming-soon {
+    margin-top: 2rem;
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent2);
+    opacity: 0.25;
+    letter-spacing: 0.05em;
+  }
+
+  .travel-stats-title {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--fg, #fffffe);
+  }
+
+  .travel-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    width: fit-content;
+    min-width: 16rem;
+  }
+
+  .travel-stat-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .travel-stat-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .travel-stat-dots {
+    flex: 1;
+    border-bottom: 2px dotted rgba(255,255,255,0.15);
+    margin-bottom: 0.2rem;
+  }
+
+  .travel-stat-number {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent2);
+    white-space: nowrap;
+  }
+
+  .travel-map-btn {
+    margin-top: 1.5rem;
+    display: inline-block;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.78rem;
+  }
+
+  .gaming-ids {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .gaming-id-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+
+  .gaming-id-platform {
+    color: var(--muted);
+    min-width: 100px;
+    flex-shrink: 0;
+  }
+
+  .gaming-id-platform::after {
+    content: '›';
+    margin-left: 0.4rem;
+    color: var(--accent);
+  }
+
+  .gaming-id-value {
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  .gaming-id-copy {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 0.15rem 0.3rem;
+    border-radius: 4px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
-    background: var(--bg);
-    transition: opacity 0.5s ease;
+    transition: color 0.2s, background 0.2s;
+    flex-shrink: 0;
   }
-  #globe-loading.hidden { opacity: 0; pointer-events: none; }
 
-  .loading-dot-row { display: flex; gap: 0.5rem; }
-  .loading-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: dot-pulse 1.2s ease-in-out infinite;
+  .gaming-id-copy:hover {
+    color: var(--accent);
+    background: rgba(245,208,0,0.08);
   }
-  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
-  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes dot-pulse {
-    0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
-    40% { opacity: 1; transform: scale(1); }
+
+  .gaming-id-copy.copied {
+    color: #28c864;
   }
-  .loading-text {
+
+  .gaming-id-copy svg {
+    width: 13px;
+    height: 13px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: opacity 0.15s;
+  }
+
+  .gaming-typewriter {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  .gaming-typewriter::before {
+    content: '> ';
+    color: var(--accent);
+  }
+
+  .gaming-typewriter::after {
+    content: '▋';
+    color: var(--accent);
+    animation: blink 1s step-end infinite;
+    margin-left: 1px;
+  }
+
+  .gaming-typewriter.done::after {
+    animation: blink 1s step-end infinite;
+  }
+
+  /* ── CONTACT ── */
+  .contact-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+  label {
     font-family: var(--font-mono);
     font-size: 0.75rem;
     color: var(--muted);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.06em;
   }
 
-  .loader-bar-wrap {
-    width: 220px;
-    height: 2px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 2px;
-    overflow: hidden;
+  input, textarea {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.7rem 1rem;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
   }
-  .loader-bar {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #f5d000, #ffb800);
-    border-radius: 2px;
-    transition: width 0.15s ease;
-    box-shadow: 0 0 8px rgba(245,208,0,0.6);
+
+  input:focus, textarea:focus { border-color: rgba(245,208,0,0.45); }
+
+  textarea { min-height: 120px; resize: vertical; }
+
+  .contact-info { color: var(--muted); }
+
+  .contact-info h3 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--text);
+    margin-bottom: 0.75rem;
   }
-  .loader-percent {
+
+  .contact-info p { font-size: 0.95rem; line-height: 1.8; margin-bottom: 1.5rem; }
+
+  .social-links { display: flex; flex-direction: column; gap: 8px; }
+
+  .social-link {
     font-family: var(--font-mono);
-    font-size: 0.7rem;
-    color: var(--accent);
-    letter-spacing: 0.08em;
+    font-size: 0.82rem;
+    color: var(--muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: color 0.2s;
   }
+
+  .social-link:hover { color: var(--accent); }
+  .social-link::before { content: '→'; color: var(--accent); }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 2rem 2.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  footer p {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .project-card.ongoing {
+  border-color: rgba(245,208,0,0.35);
+  background: rgba(245,208,0,0.05);
+}
+
+.ongoing-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: #a88a00;
+  background: rgba(245,208,0,0.15);
+  border: 1px solid rgba(245,208,0,0.3);
+  border-radius: 3px;
+  padding: 2px 8px;
+  margin-bottom: 0.75rem;
+}
+
+.ongoing-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s infinite;
+}
+
+.project-card.completed {
+  border-color: rgba(40,200,100,0.35);
+  background: rgba(40,200,100,0.05);
+}
+
+.completed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: #1a8a4a;
+  background: rgba(40,200,100,0.15);
+  border: 1px solid rgba(40,200,100,0.3);
+  border-radius: 3px;
+  padding: 2px 8px;
+  margin-bottom: 0.75rem;
+}
+
+.completed-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #28c864;
+}
+
+.project-card.new {
+  border-color: rgba(60,140,245,0.35);
+  background: rgba(60,140,245,0.05);
+}
+
+.new-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: #1a5faa;
+  background: rgba(60,140,245,0.15);
+  border: 1px solid rgba(60,140,245,0.3);
+  border-radius: 3px;
+  padding: 2px 8px;
+  margin-bottom: 0.75rem;
+}
+
+.new-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3c8cf5;
+  animation: pulse 2s infinite;
+}
+
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ── SCROLL FADE ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .fade-in.visible { opacity: 1; transform: none; }
+
+  /* TABLET */
+  @media (max-width: 1024px) {
+    .projects-grid { grid-template-columns: repeat(2, 1fr); }
+    .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .contact-inner { grid-template-columns: 1fr; gap: 2rem; }
+  }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.25rem; position: relative; }
+    .nav-links { display: none; flex-direction: column; gap: 0; position: absolute; top: 100%; left: 0; right: 0; background: rgba(10,10,10,0.98); border-bottom: 1px solid var(--border); padding: 0.5rem 0; z-index: 999; }
+    .nav-links.open { display: flex; }
+    .nav-links li a { display: block; padding: 0.85rem 1.5rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+    .hamburger { display: flex; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.3s; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .hero { min-height: 80vh; padding: 3rem 1.25rem; }
+    .hero-sub { font-size: 0.95rem; }
+    .hero-cta { flex-direction: column; }
+    .btn { justify-content: center; text-align: center; }
+    section { padding: 3rem 1.25rem; }
+    .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .projects-grid { grid-template-columns: 1fr; }
+    .hobbies-tabs { grid-template-columns: 1fr; }
+    .hobbies-tab-list { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--border); }
+    .hobby-tab { flex-direction: column; gap: 0.3rem; padding: 0.75rem 1rem; border-bottom: none; border-left: none; border-top: 2px solid transparent; border-right: 1px solid var(--border); font-size: 0.72rem; white-space: nowrap; flex-shrink: 0; }
+    .hobby-tab:last-child { border-right: none; }
+    .hobby-tab.active { border-left-color: transparent; border-top-color: var(--accent); }
+    .hobby-tab-arrow { display: none; }
+    .hobbies-panel-wrap { padding: 1.75rem; }
+    .contact-inner { grid-template-columns: 1fr; gap: 2rem; }
+    footer { flex-direction: column; gap: 0.75rem; text-align: center; padding: 1.5rem 1.25rem; }
+  }
+
+  /* SMALL MOBILE */
+  @media (max-width: 480px) {
+    .hobbies-panel-wrap { padding: 1.25rem; }
+    .hero-cta .btn { width: 100%; }
+    .nav-logo { font-size: 1rem; }
+    .hero-photo { width: 160px !important; height: 160px !important; }
+  }
+
+  @media (max-width: 768px) {
+    .hero-photo { width: 200px !important; height: 200px !important; }
+  }
+
+  .hamburger { display: none; }
+
+  /* ── PHOTO ORBIT ── */
+  .photo-orbit-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 380px;
+    height: 380px;
+  }
+
+  .solar-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(245,208,0,0.15);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .solar-ring-1 { width: 370px; height: 370px; }
+  .solar-ring-2 { width: 420px; height: 420px; }
+
+  .planet-orbit {
+    position: absolute;
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .planet-orbit-1 {
+    width: 370px; height: 370px;
+    animation: orbit-cw 9s linear infinite;
+  }
+
+  .planet-orbit-2 {
+    width: 420px; height: 420px;
+    animation: orbit-ccw 15s linear infinite;
+  }
+
+  .planet {
+    position: absolute;
+    border-radius: 50%;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .planet-1 {
+    width: 16px; height: 16px;
+    background: radial-gradient(circle at 35% 35%, #ffe57a, #c8860a);
+    box-shadow: 0 0 10px 3px rgba(245,208,0,0.5);
+    margin-top: -8px;
+  }
+
+  .planet-2 {
+    width: 12px; height: 12px;
+    background: radial-gradient(circle at 35% 35%, #a8d8ff, #2a6aad);
+    box-shadow: 0 0 8px 3px rgba(80,160,255,0.45);
+    margin-top: -6px;
+  }
+
+  @keyframes orbit-cw {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  @keyframes orbit-ccw {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(-360deg); }
+  }
+
+  @media (max-width: 768px) {
+    .photo-orbit-wrap { width: 280px; height: 280px; }
+    .solar-ring-1 { width: 270px; height: 270px; }
+    .solar-ring-2 { width: 310px; height: 310px; }
+    .planet-orbit-1 { width: 270px; height: 270px; }
+    .planet-orbit-2 { width: 310px; height: 310px; }
+  }
+
+  @media (max-width: 480px) {
+    .photo-orbit-wrap { width: 230px; height: 230px; }
+    .solar-ring-1 { width: 220px; height: 220px; }
+    .solar-ring-2 { width: 255px; height: 255px; }
+    .planet-orbit-1 { width: 220px; height: 220px; }
+    .planet-orbit-2 { width: 255px; height: 255px; }
+  }
+
+  /* ── CARD PREVIEW ── */
+  .card-preview {
+    margin: -1.75rem -1.75rem 1.25rem;
+    width: calc(100% + 3.5rem);
+    height: 160px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    background: #060d18;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px 6px 0 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .preview-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: block;
+  }
+
+  .stage-overlay-label {
+    position: absolute;
+    top: 8px; left: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .stage-tabs {
+    position: absolute;
+    bottom: 6px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 5px;
+    z-index: 2;
+  }
+
+  .stage-dot {
+    width: 20px; height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.15);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .stage-dot.active { background: rgba(255,255,255,0.75); }
+
+  .soon-dots { position: absolute; inset: 0; overflow: hidden; }
+  .soon-dots span {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: #2a2a35;
+    border-radius: 50%;
+  }
+
+  .soon-lock {
+    font-family: var(--font-mono);
+    font-size: 2.2rem;
+    color: #2a2a35;
+    position: relative; z-index: 1;
+  }
+ 
 </style>
 </head>
 <body>
 
-<div id="globe-loading">
-  <div class="loading-dot-row">
-    <div class="loading-dot"></div>
-    <div class="loading-dot"></div>
-    <div class="loading-dot"></div>
+<!-- ── LOADING SCREEN ── -->
+<div id="loading-screen">
+  <div class="loader-inner">
+    <div class="loader-logo"><span class="loader-asterisk">*</span>KEN</div>
+    <div class="loader-label">Initializing systems...</div>
+    <div class="loader-bar-wrap">
+      <div class="loader-bar" id="loader-bar"></div>
+    </div>
+    <div class="loader-percent" id="loader-percent">0%</div>
+    <button id="loader-enter-btn" class="btn btn-primary" style="display:none; margin-top:1.25rem; font-size:0.82rem; opacity:0; transition: opacity 0.4s ease;">
+      Enter Site →
+    </button>
   </div>
-  <p class="loading-text" id="loading-text">Loading map...</p>
-  <div class="loader-bar-wrap">
-    <div class="loader-bar" id="loader-bar"></div>
-  </div>
-  <p class="loader-percent" id="loader-percent">0%</p>
 </div>
 
-<header class="travel-header">
-  <a href="index.html" class="travel-back">
-    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M9 2L4 7l5 5"/>
-    </svg>
-    back
-  </a>
-  <div class="travel-title-group">
-    <span class="travel-label">// travel log</span>
-    <span class="travel-title">Where I've been</span>
+<nav style="position: relative;">
+  <div class="nav-logo"><span class="logo-asterisk">*</span>KEN</div>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="#about">about</a></li>
+    <li><a href="#projects">projects</a></li>
+    <li><a href="#side-projects">side projects</a></li>
+    <li><a href="#hobbies">hobbies</a></li>
+    <li><a href="#contact">contact</a></li>
+  </ul>
+  <div style="display:flex; align-items:center; gap:0.75rem;">
+    <button id="mute-btn" aria-label="Toggle sound" title="Toggle hover sound" style="
+      background: transparent; border: 1px solid rgba(245,208,0,0.4); border-radius: 4px;
+      color: var(--accent); cursor: pointer; font-size: 0.72rem;
+      padding: 5px 10px; transition: border-color 0.2s, color 0.2s, background 0.2s;
+      font-family: var(--font-mono); letter-spacing: 0.08em; line-height: 1;">🔊 SFX</button>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
   </div>
-  <span class="travel-badge">9 countries visited</span>
-</header>
+</nav>
 
-<div id="globe-container"></div>
+<!-- ── HERO ── -->
+<section class="hero">
+  <div style="display: flex; align-items: center; justify-content: space-between; gap: 2.5rem; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 280px;">
+      <div class="hero-tag">Software Developer and Systems Analyst</div>
+      <h1>Building<br/>systems that<br/><span>actually work.</span></h1>
+      <p class="hero-sub">
+        I'm Ken! a developer and analyst at a bank in Manila. I build and maintain backend systems in the morning, and do web design projects at night.
+      </p>
+      <div class="hero-cta">
+        <a href="#projects" class="btn btn-primary">View my work →</a>
+        <a href="#contact" class="btn btn-outline">Hire Me</a>
+      </div>
+    </div>
+    <!-- Animated dev illustration -->
+    <div class="hero-illustration" aria-hidden="true">
+      <canvas id="dev-canvas"></canvas>
+    </div>
+  </div>
+</section>
 
-<p class="travel-hint">Click &amp; drag to rotate &nbsp;·&nbsp; Scroll to zoom</p>
+<!-- ── ABOUT ── -->
+<section id="about">
+  <div class="about-grid fade-in">
+    <div>
+      <div class="section-label">// about me</div>
+      <h2>The person<br/>behind the code.</h2>
+      <p class="about-bio">
+	    Welcome to my website! If you are interested in my work and hobbies feel free to browse my website.
+		<br/><br/>
+        I'm a <strong>Software Engineer</strong> and <strong>Systems Analyst</strong> with hands-on experience in several programming languages and designing solutions. Currently at a banking industry, I always work all-nighter keeping critical banking systems alive and running.
+        <br/><br/>
+        I’m also a <strong>Freelance Web developer</strong> with experience building and managing web applications and websites. Available for projects to help bring your ideas to life and keep your web presence running smoothly.
+        <br/><br/>
+        I enjoy solving the kind of problems that most people don't even realize are problems. It's like a famous meme said:
+		<br/>
+		<strong>"I Don't Want Peace, I Want Problems, Always"</strong>
+      <div class="skills-list">
+        <span class="skill-tag highlight">Java</span>
+        <span class="skill-tag highlight">Springboot</span>
+        <span class="skill-tag highlight">SQL Server</span>
+		<span class="skill-tag highlight">Oracle SQL</span>
+		<span class="skill-tag highlight">PL/SQL</span>
+        <span class="skill-tag">Tomcat</span>
+        <span class="skill-tag">Bash</span>
+        <span class="skill-tag">C#</span>
+		<span class="skill-tag">.Net</span>
+        <span class="skill-tag">HTML</span>
+        <span class="skill-tag">CSS</span>
+		<span class="skill-tag">Weblogic</span>
+		<span class="skill-tag">JavaScript</span>
+        <span class="skill-tag">Windows</span>
+        <span class="skill-tag">Linux</span>
+        <span class="skill-tag">Python</span>
+		<span class="skill-tag">PHP</span>
+        <span class="skill-tag">REST APIs</span>
+      </div>
+    </div>
+    <div class="terminal-box">
+      <!-- Title bar -->
+      <div class="terminal-titlebar">
+        <span class="term-dot term-red"></span>
+        <span class="term-dot term-yellow"></span>
+        <span class="term-dot term-green"></span>
+        <span class="terminal-title">ken@portfolio ~ stats.sh</span>
+      </div>
+      <!-- Terminal body -->
+      <div class="terminal-body" id="terminal-body">
+        <div class="term-line"><span class="term-prompt">$</span> <span class="term-cmd">run stats.sh</span></div>
+        <div class="term-line term-comment"># Loading developer profile...</div>
+        <div class="term-output" id="term-out-1" style="display:none;">
+          <div class="term-line"><span class="term-key">experience.sql</span> <span class="term-arrow">→</span> <span class="term-val stat-num" data-target="12">0</span><span class="term-unit"> yrs</span></div>
+          <div class="term-sub">Enterprise SQL development</div>
+        </div>
+        <div class="term-output" id="term-out-2" style="display:none;">
+          <div class="term-line"><span class="term-key">experience.html_css</span> <span class="term-arrow">→</span> <span class="term-val stat-num" data-target="7">0</span><span class="term-unit"> yrs</span></div>
+          <div class="term-sub">HTML &amp; CSS</div>
+        </div>
+        <div class="term-output" id="term-out-3" style="display:none;">
+          <div class="term-line"><span class="term-key">experience.java</span> <span class="term-arrow">→</span> <span class="term-val stat-num" data-target="5">0</span><span class="term-unit"> yrs</span></div>
+          <div class="term-sub">Java &amp; Spring Boot</div>
+        </div>
+        <div class="term-output" id="term-out-4" style="display:none;">
+          <div class="term-line"><span class="term-key">experience.dotnet</span> <span class="term-arrow">→</span> <span class="term-val stat-num" data-target="5">0</span><span class="term-unit"> yrs</span></div>
+          <div class="term-sub">.Net Development</div>
+        </div>
+        <div class="term-output" id="term-out-5" style="display:none;">
+          <div class="term-line"><span class="term-key">experience.javascript</span> <span class="term-arrow">→</span> <span class="term-val stat-num" data-target="5">0</span><span class="term-unit"> yrs</span></div>
+          <div class="term-sub">JavaScript</div>
+        </div>
+        <div class="term-output" id="term-out-done" style="display:none;">
+          <div class="term-line term-success">✓ Profile loaded successfully.</div>
+        </div>
+        <div class="term-line term-cursor-line"><span class="term-prompt">$</span> <span class="term-caret">▋</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROJECTS ── -->
+<section id="projects">
+  <div class="section-label">// selected work</div>
+  <h2>Projects &<br/>contributions.</h2>
+  <p class="section-intro">A selection of technical work — real systems, real problems, real solutions.</p>
+  <div class="projects-grid fade-in">
+    <div class="project-card">
+      <div class="project-number">01 — Springboot/SQL Server/Tomcat</div>
+      <h3>Accounting System Migration</h3>
+      <p>Designed and developed the full upgrade of the Accounting banking system of BDO from Java 8/Tomcat 8 to Java 11/Tomcat 9, resolving a cascade of compatibility issues across authentication, HTTP clients, and encoding.</p>
+      <div class="project-tags">
+        <span class="project-tag">Java 11</span>
+        <span class="project-tag">Tomcat 9</span>
+        <span class="project-tag">Spring</span>
+        <span class="project-tag">T-SQL</span>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-number">02 — Java/Weblogic/Oracle SQL</div>
+      <h3>Collection System Upgrade</h3>
+      <p>Developed and provided a support for the upgrade of Collection Management System of Eastwest bank, resolved stored procedurs and functions issues upon upgrading the system.</p>
+      <div class="project-tags">
+        <span class="project-tag">Java</span>
+        <span class="project-tag">Weblogic</span>
+        <span class="project-tag">PL/SQL</span>
+        <span class="project-tag">Oracle</span>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-number">03 — Oracle SQL</div>
+      <h3>Data Migration of Accounts</h3>
+      <p>Data migrated the accounts of Standard Chartered Accounts to Eastwest Bank's Recovery Management System as part of the merger of two banks.</p>
+      <div class="project-tags">
+        <span class="project-tag">PL/SQL</span>
+        <span class="project-tag">Oracle</span>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-number">04 — SQL Server</div>
+      <h3>Report Extractions</h3>
+      <p>Developed and maintained report extraction solutions using SQL Server and SSIS, delivering accurate and timely data for various banking systems.</p>
+      <div class="project-tags">
+        <span class="project-tag">SQL Server</span>
+        <span class="project-tag">T-SQL</span>
+        <span class="project-tag">SSIS</span>
+      </div>
+    </div>
+	<div class="project-card">
+      <div class="project-number">05 — SQL Server</div>
+      <h3>Stored Procedure Optimization</h3>
+      <p>Optimized stored procedures across multiple banking systems to enhance performance, reduce execution time, and improve overall system efficiency..</p>
+      <div class="project-tags">
+        <span class="project-tag">SQL Server</span>
+        <span class="project-tag">T-SQL</span>
+        <span class="project-tag">Oracle SQL</span>
+		<span class="project-tag">Performance</span>
+      </div>
+    </div>
+	 <div class="project-card">
+      <div class="project-number">06 — REST API/AWS/Systems Analyst</div>
+      <h3>24 HR Repair Globe One</h3>
+      <p>Integrated the APIs of the Workforce Management System with the Globe Telecom mobile applications, specifically the Globe One App. </p>
+      <div class="project-tags">
+        <span class="project-tag">REST API</span>
+		 <span class="project-tag">AWS</span>
+      </div>
+    </div>
+	 <div class="project-card">
+      <div class="project-number">07 — REST API/AWS/Systems Analyst</div>
+      <h3>Globe Prepaid Fiber</h3>
+      <p>Responsible for integrating API's of Workforce Management System in Globe Prepaid Fiber and also responsible in for overseeing any related changes in the Workforce Management System.</p>
+      <div class="project-tags">
+        <span class="project-tag">REST API</span>
+        <span class="project-tag">Outsystem</span>
+        <span class="project-tag">AWS</span>
+      </div>
+    </div>
+	<div class="project-card">
+      <div class="project-number">08 — SQL Server/AWS/Systems Analyst</div>
+      <h3>Oracle ESB to HIP Migration</h3>
+      <p>Developed and optimized stored procedures/config files for compatibility issues encountered in the new middleware implemented.</p>
+      <div class="project-tags">
+        <span class="project-tag">SQL Server</span>
+        <span class="project-tag">AWS</span>
+        <span class="project-tag">Performance</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SIDE PROJECTS ── -->
+<section id="side-projects">
+  <div class="section-label">// non corporate</div>
+  <h2>Side Projects.</h2>
+  <p class="section-intro">More of a hobby and learning new tech stacks.</p>
+  <div class="projects-grid fade-in">
+
+    <div class="project-card completed">
+      <div class="card-preview">
+        <div class="soon-dots" id="dots-ngo"></div>
+        <div class="soon-lock">🔒</div>
+      </div>
+      <div class="completed-badge">Completed</div>
+      <div class="project-number">Released — Q3 2024</div>
+      <h3>Website for an Australian NGO</h3>
+      <p>Developed a professional website for an Australian non-government organization, designed to effectively showcase their mission, programs, and community impact.</p>
+      <div class="project-tags">
+        <span class="project-tag">HTML</span>
+        <span class="project-tag">CSS</span>
+        <span class="project-tag">Javascript</span>
+      </div>
+    </div>
+
+    <div class="project-card completed">
+      <div class="card-preview">
+        <div class="soon-dots" id="dots-sme"></div>
+        <div class="soon-lock">🔒</div>
+      </div>
+      <div class="completed-badge">Completed</div>
+      <div class="project-number">Released — Q4 2024</div>
+      <h3>Website for a SME</h3>
+      <p>Developed a website for a small restaurant business, designed to effectively showcase its menu, products, and brand, helping increase online visibility and attract more customers.</p>
+      <div class="project-tags">
+        <span class="project-tag">HTML</span>
+        <span class="project-tag">CSS</span>
+        <span class="project-tag">Javascript</span>
+      </div>
+    </div>
+
+    <div class="project-card completed">
+      <div class="card-preview">
+        <canvas class="preview-canvas" id="wedding-canvas"></canvas>
+      </div>
+      <div class="completed-badge">Completed</div>
+      <div class="project-number">Released — Q1 2026</div>
+      <h3>Website for my Brother's Wedding</h3>
+      <p>Developed a website for my brothers wedding which includes RSVP for the guest and Photo Uploader, so that the wedding can upload their photos during the wedding.</p>
+      <div class="project-tags">
+        <span class="project-tag">HTML</span>
+        <span class="project-tag">CSS</span>
+        <span class="project-tag">Javascript</span>
+      </div>
+      <div style="margin-top: 1.25rem;">
+        <a href="https://solidkenn.github.io/kalveen-and-nika/" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="font-size: 0.75rem; padding: 0.5rem 1.25rem;">▶ Visit Now</a>
+      </div>
+    </div>
+
+    <div class="project-card completed">
+      <div class="card-preview">
+        <canvas class="preview-canvas" id="easybook-canvas"></canvas>
+      </div>
+      <div class="completed-badge">Completed</div>
+      <div class="project-number">Released — April 2026</div>
+      <h3>EasyBook</h3>
+      <p>A modular simple and hassle-free appointment booking web app. Lets users choose a service, pick a date and time, and confirm with a reference number and a personal cancellation link.</p>
+      <div class="project-tags">
+        <span class="project-tag">HTML</span>
+        <span class="project-tag">CSS</span>
+        <span class="project-tag">JavaScript</span>
+      </div>
+      <div style="margin-top: 1.25rem;">
+        <a href="https://solidkenn.github.io/easybook/" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="font-size: 0.75rem; padding: 0.5rem 1.25rem;" onclick="event.stopPropagation()">▶ Visit Now</a>
+      </div>
+    </div>
+
+    <div class="project-card completed">
+      <div class="card-preview">
+        <canvas class="preview-canvas" id="pong-canvas"></canvas>
+        <div class="stage-overlay-label" id="pong-stage-label">NEON</div>
+        <div class="stage-tabs">
+          <div class="stage-dot active" data-stage="0"></div>
+          <div class="stage-dot" data-stage="1"></div>
+          <div class="stage-dot" data-stage="2"></div>
+          <div class="stage-dot" data-stage="3"></div>
+        </div>
+      </div>
+      <div class="completed-badge">Completed</div>
+      <div class="project-number">Released — April 2026</div>
+      <h3>Neon Pong</h3>
+      <p>A free web based Pong game with a futuristic theme. This is a test project for my first development web based game</p>
+      <div class="project-tags">
+        <span class="project-tag">HTML</span>
+        <span class="project-tag">CSS</span>
+        <span class="project-tag">Javascript</span>
+      </div>
+      <div style="margin-top: 1.25rem;">
+        <a href="https://solidkenn.github.io/solidken/neon_pong.html" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="font-size: 0.75rem; padding: 0.5rem 1.25rem;" onclick="event.stopPropagation()">▶ Play Now</a>
+      </div>
+    </div>
+
+    <div class="project-card completed">
+      <div class="card-preview">
+        <canvas class="preview-canvas" id="surgimatch-canvas"></canvas>
+      </div>
+      <div class="completed-badge">Completed</div>
+      <div class="project-number">Released — May 2026</div>
+      <h3>SurgiMatch</h3>
+      <p>A simple web experience that helps patients narrow down surgeon options based on their needs, so they can move from search overload to a short, clearer list.</p>
+      <div class="project-tags">
+        <span class="project-tag">JavaScript</span>
+        <span class="project-tag">Google Apps Script</span>
+        <span class="project-tag">Google Sheet</span>
+      </div>
+      <div style="margin-top: 1.25rem;">
+        <a href="https://solidkenn.github.io/surgimatch/" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="font-size: 0.75rem; padding: 0.5rem 1.25rem;" onclick="event.stopPropagation()">▶ Visit Now</a>
+      </div>
+    </div>
+
+    <div class="project-card ongoing">
+      <div class="card-preview">
+        <canvas class="preview-canvas" id="bingo-canvas"></canvas>
+      </div>
+      <div class="ongoing-badge">Ongoing</div>
+      <div class="project-number">Target Release — May 2026</div>
+      <h3>HearMe Bingo</h3>
+      <p>A modern take on Bingo because shouting numbers across the room is so last century. This web app features a Caller that announces and recaps numbers clearly, making the game more accessible for everyone especially the lolas and lolos who deserve better than "WHAT NUMBER WAS THAT?!"</p>
+      <div class="project-tags">
+        <span class="project-tag">HTML5</span>
+        <span class="project-tag">CSS3</span>
+        <span class="project-tag">Javascript</span>
+      </div>
+      <div style="margin-top: 1.25rem;">
+        <a href="https://solidkenn.github.io/solidken/hearme-bingo.html" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="font-size: 0.75rem; padding: 0.5rem 1.25rem;">▶ Test Build</a>
+      </div>
+    </div>
+
+    <div class="project-card new">
+      <div class="card-preview">
+        <div class="soon-dots" id="dots-breakout"></div>
+        <div class="soon-lock">?</div>
+      </div>
+      <div class="new-badge">New</div>
+      <div class="project-number">Target Release — May/June 2026</div>
+      <h3>Project Breakout</h3>
+      <p>A free web based Breakout game. This is a test project for a compilation of free web based game.</p>
+      <div class="project-tags">
+        <span class="project-tag">Planning Phase</span>
+      </div>
+    </div>
+
+    <div class="project-card new">
+      <div class="card-preview">
+        <div class="soon-dots" id="dots-mytransactions"></div>
+        <div class="soon-lock">?</div>
+      </div>
+      <div class="new-badge">New</div>
+      <div class="project-number">Target Release — TBA</div>
+      <h3>Project Ledger</h3>
+      <p>A financial application website for tracking and managing household transactions.</p>
+      <div class="project-tags">
+        <span class="project-tag">TBA</span>
+      </div>
+    </div>
+
+    <div class="project-card new">
+      <div class="card-preview">
+        <div class="soon-dots" id="dots-tbc"></div>
+        <div class="soon-lock">?</div>
+      </div>
+      <div class="new-badge">New</div>
+      <div class="project-number">Target Release — June 2026</div>
+      <h3>The Bored Corporate</h3>
+      <p>A personal website where I showcase my game development work and arcade-style projects, with more interactive features coming soon.</p>
+      <div class="project-tags">
+        <span class="project-tag">Planning Phase</span>
+      </div>
+    </div>
+
+    <div class="project-card new">
+      <div class="card-preview">
+        <div class="soon-dots" id="dots-smart-restaurant"></div>
+        <div class="soon-lock">?</div>
+      </div>
+      <div class="new-badge">New</div>
+      <div class="project-number">Target Release — TBA</div>
+      <h3>Smart Restaurant Prototype</h3>
+      <p>A smart restaurant concept focused on delivering great service quality and customer experience.</p>
+      <div class="project-tags">
+        <span class="project-tag">Planning Phase</span>
+      </div>
+    </div>
+
+    <div class="project-card new">
+      <div class="card-preview">
+        <div class="soon-dots" id="dots-halberd"></div>
+        <div class="soon-lock">?</div>
+      </div>
+      <div class="new-badge">New</div>
+      <div class="project-number">Target Release — TBA</div>
+      <h3>Project Halberd</h3>
+      <p>Conceptualizing and designing an indie game that combines roguelike mechanics with strategy RPG elements, currently in the planning and concept phase.</p>
+      <div class="project-tags">
+        <span class="project-tag">TBA</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── HOBBIES ── -->
+<section id="hobbies">
+  <div class="section-label">// beyond the terminal</div>
+  <h2>When I'm not<br/>debugging.</h2>
+  <p class="section-intro">This is what I do outside work.</p>
+  <div class="hobbies-tabs fade-in">
+
+    <div class="hobbies-tab-list" role="tablist">
+      <button class="hobby-tab active" data-tab="gaming" role="tab" aria-selected="true" aria-controls="panel-gaming">
+        <span class="hobby-tab-icon">🎮</span>
+        <span class="hobby-tab-name">Gaming</span>
+        <span class="hobby-tab-arrow">→</span>
+      </button>
+      <button class="hobby-tab" data-tab="tech" role="tab" aria-selected="false" aria-controls="panel-tech">
+        <span class="hobby-tab-icon">🖥️</span>
+        <span class="hobby-tab-name">Tech</span>
+        <span class="hobby-tab-arrow">→</span>
+      </button>
+      <button class="hobby-tab" data-tab="music" role="tab" aria-selected="false" aria-controls="panel-music">
+        <span class="hobby-tab-icon">🎸</span>
+        <span class="hobby-tab-name">Music</span>
+        <span class="hobby-tab-arrow">→</span>
+      </button>
+      <button class="hobby-tab" data-tab="travel" role="tab" aria-selected="false" aria-controls="panel-travel">
+        <span class="hobby-tab-icon">✈️</span>
+        <span class="hobby-tab-name">Travel</span>
+        <span class="hobby-tab-arrow">→</span>
+      </button>
+      <button class="hobby-tab" data-tab="geek" role="tab" aria-selected="false" aria-controls="panel-geek">
+        <span class="hobby-tab-icon">👓</span>
+        <span class="hobby-tab-name">Geek Stuff</span>
+        <span class="hobby-tab-arrow">→</span>
+      </button>
+    </div>
+
+    <div class="hobbies-panel-wrap">
+      <div class="hobby-panel active" id="panel-gaming" role="tabpanel">
+        <span class="hobby-panel-icon">🎮</span>
+        <h3>Gaming</h3>
+        <p class="gaming-typewriter" id="gaming-typewriter-text" data-text="Playing Competitive FPS, JRPG, Action-Adventure and Platformers to get more stressful and look older."></p>
+        <p class="gaming-add-me">Add me up in any platforms:</p>
+        <div class="gaming-ids">
+          <div class="gaming-id-row">
+            <span class="gaming-id-platform">Steam</span>
+            <span class="gaming-id-value">373132949</span>
+            <button class="gaming-id-copy" data-copy="373132949" title="Copy Steam ID">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+          <div class="gaming-id-row">
+            <span class="gaming-id-platform">Battle.net</span>
+            <span class="gaming-id-value">solidken#11107</span>
+            <button class="gaming-id-copy" data-copy="solidken#11107" title="Copy Battle.net ID">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+          <div class="gaming-id-row">
+            <span class="gaming-id-platform">PSN</span>
+            <span class="gaming-id-value">superproxy99</span>
+            <button class="gaming-id-copy" data-copy="superproxy99" title="Copy PSN ID">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+          <div class="gaming-id-row">
+            <span class="gaming-id-platform">Epic Games</span>
+            <span class="gaming-id-value">solidken99</span>
+            <button class="gaming-id-copy" data-copy="solidken99" title="Copy Epic Games ID">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+          <div class="gaming-id-row">
+            <span class="gaming-id-platform">Riot</span>
+            <span class="gaming-id-value">Solidken #KSS <span style="color:var(--muted);font-size:0.72rem;">(Valorant)</span></span>
+            <button class="gaming-id-copy" data-copy="Solidken #KSS" title="Copy Riot ID">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+          <div class="gaming-id-row">
+            <span class="gaming-id-platform">Xbox</span>
+            <span class="gaming-id-value">solidken99</span>
+            <button class="gaming-id-copy" data-copy="solidken99" title="Copy Xbox Gamertag">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="hobby-panel" id="panel-tech" role="tabpanel">
+        <span class="hobby-panel-icon">🖥️</span>
+        <h3>Tech</h3>
+        <p class="gaming-typewriter" id="tech-typewriter-text" data-text="Buying some shiny techs to be used in 'work' but end up using in other foolish things."></p>
+        <div class="tech-specs-layout">
+          <div class="tech-specs-col">
+            <p class="pc-specs-title">Current PC Specs:</p>
+            <div class="pc-specs">
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">CPU</span>
+                <span class="pc-spec-value">AMD Ryzen 7 5800X3D</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">GPU</span>
+                <span class="pc-spec-value">Gigabyte RTX 5080 Gaming OC 16GB</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">Motherboard</span>
+                <span class="pc-spec-value">Gigabyte B450 Aorus Elite</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">RAM</span>
+                <span class="pc-spec-value">32GB G.Skill Ripjaws V 3600MHz DDR4</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">Storage</span>
+                <span class="pc-spec-value">1TB Lexar NVMe N620 M.2</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">Storage 2</span>
+                <span class="pc-spec-value">1TB WD Blue HDD</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">PSU</span>
+                <span class="pc-spec-value">Seasonic Core GX 850W V2</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">AIO Cooler</span>
+                <span class="pc-spec-value">Thermalright Aqua Elite 360</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">Case Fans</span>
+                <span class="pc-spec-value">Arctic P12 Pro</span>
+              </div>
+            </div>
+          </div>
+          <div class="tech-specs-col">
+            <p class="pc-specs-title">Gaming Platforms:</p>
+            <div class="pc-specs">
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">Console</span>
+                <span class="pc-spec-value">Playstation 5</span>
+              </div>
+              <div class="pc-spec-row">
+                <span class="pc-spec-label">Console</span>
+                <span class="pc-spec-value">Nintendo Switch</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hobby-panel" id="panel-music" role="tabpanel">
+        <span class="hobby-panel-icon">🎸</span>
+        <h3>Music</h3>
+        <p>My only hobby that is not doing senseless things. Enjoying a good music and playing guitar is what I love.</p>
+        <p class="hobby-coming-soon">Coming Soon</p>
+      </div>
+      <div class="hobby-panel" id="panel-travel" role="tabpanel">
+        <span class="hobby-panel-icon">✈️</span>
+        <h3>Travel</h3>
+        <p class="gaming-typewriter" id="travel-typewriter-text" data-text="Exploring the world one trip at a time. Costly? Yes. Worth it? Absolutely. Check out my visited places for more details."></p>
+        <p class="travel-stats-title">Travel Stats:</p>
+        <div class="travel-stats">
+          <div class="travel-stat-row">
+            <span class="travel-stat-label">Countries</span>
+            <span class="travel-stat-dots"></span>
+            <span class="travel-stat-number">9</span>
+          </div>
+          <div class="travel-stat-row">
+            <span class="travel-stat-label">Cities</span>
+            <span class="travel-stat-dots"></span>
+            <span class="travel-stat-number">24</span>
+          </div>
+          <div class="travel-stat-row">
+            <span class="travel-stat-label">Continents</span>
+            <span class="travel-stat-dots"></span>
+            <span class="travel-stat-number">4</span>
+          </div>
+        </div>
+        <a href="travel.html" target="_blank" rel="noopener noreferrer" class="btn btn-primary travel-map-btn">Visited Places →</a>
+      </div>
+      <div class="hobby-panel" id="panel-geek" role="tabpanel">
+        <span class="hobby-panel-icon">👓</span>
+        <h3>Geek Stuff</h3>
+        <p>Collecting some nonsense things that is eyecandy to some people. It's not expensive!</p>
+        <p class="hobby-coming-soon">Coming Soon</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── CONTACT ── -->
+<section id="contact">
+  <div class="section-label">// let's communicate</div>
+  <h2>Get in touch.</h2>
+  <div class="contact-inner fade-in">
+    <form action="https://formspree.io/f/xaqlpqaj" method="POST" class="contact-form" id="contact-form">
+      <div class="form-group">
+        <label>name</label>
+        <input type="text" name="name" placeholder="Your name" required />
+      </div>
+      <div class="form-group">
+        <label>email</label>
+        <input type="email" name="email" placeholder="your@email.com" required />
+      </div>
+      <div class="form-group">
+        <label>message</label>
+        <textarea name="message" placeholder="What's on your mind?" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" style="align-self: flex-start;" id="submit-btn">Send message →</button>
+      <p id="form-status" style="font-family: var(--font-mono); font-size: 0.8rem; margin-top: 0.5rem; display: none;"></p>
+    </form>
+    <div class="contact-info">
+      <h3>Open to opportunities.</h3>
+      <p>Whether it's a collaboration, a systems challenge, or just a conversation anything under the sun — I'm happy to connect.</p>
+      <div class="social-links">
+        <!-- TODO: Replace # with your actual links -->
+	<a href="https://github.com/solidkenn" class="social-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+	<a href="https://www.linkedin.com/in/solidken/" class="social-link" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+	<a href="https://www.facebook.com/kssolid/" class="social-link" target="_blank" rel="noopener noreferrer">Facebook</a>
+	<a href="https://www.instagram.com/solidkenn/" class="social-link" target="_blank" rel="noopener noreferrer">Instagram</a>
+      </div>
+	   <div style="flex-shrink: 0; display: flex; justify-content: center; align-items: center; padding-right: 2rem;">
+      <div class="photo-orbit-wrap">
+        <!-- Static orbit ring guides -->
+        <div class="solar-ring solar-ring-1"></div>
+        <div class="solar-ring solar-ring-2"></div>
+        <!-- Inner planet — warm gold, clockwise -->
+        <div class="planet-orbit planet-orbit-1">
+          <div class="planet planet-1"></div>
+        </div>
+        <!-- Outer planet — cool blue, counter-clockwise -->
+        <div class="planet-orbit planet-orbit-2">
+          <div class="planet planet-2"></div>
+        </div>
+        <img src="profile.jpg" alt="Ken" class="hero-photo"
+          style="width: 320px; height: 320px; border-radius: 50%; object-fit: cover;
+                 object-position: top center;
+                 border: 4px solid var(--accent); display: block; position: relative; z-index: 1;" />
+      </div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <p>© 2026 solidken</p>
+  <div class="status-dot">
+    <span class="dot"></span>
+    Currently working on HearMe Bingo, Project Breakout and The Bored Corporate
+  </div>
+</footer>
+
 
 <script>
-  const VISITED = ['SG','HK','MY','KR','GB','AU','CA','AE','PH'];
-  const loading   = document.getElementById('globe-loading');
-  const container = document.getElementById('globe-container');
+  // ── Hero dev illustration ─────────────────────────────────────────────
+  (function(){
+    const canvas = document.getElementById('dev-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = 420, H = 340;
+    canvas.width = W; canvas.height = H;
 
-  const loaderBar     = document.getElementById('loader-bar');
-  const loaderPercent = document.getElementById('loader-percent');
-  const loadingText   = document.getElementById('loading-text');
+    let t = 0;
 
-  function setProgress(pct) {
-    loaderBar.style.width = pct + '%';
-    loaderPercent.textContent = Math.round(pct) + '%';
-    if (pct >= 100) loadingText.textContent = 'Building globe...';
-  }
+    // Floating code snippets (left and right of scene)
+    const snippets = [
+      { text: 'SELECT *',        x: 12,  y: 120, speed: 0.28, opacity: 0.50 },
+      { text: '@SpringBoot',     x: 8,   y: 180, speed: 0.20, opacity: 0.42 },
+      { text: 'git push',        x: 15,  y: 240, speed: 0.24, opacity: 0.38 },
+      { text: 'catch(e) {}',     x: 340, y: 100, speed: 0.22, opacity: 0.45 },
+      { text: 'ALTER TABLE',     x: 335, y: 160, speed: 0.30, opacity: 0.40 },
+    ];
 
-  fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson')
-    .then(res => {
-      const total = +res.headers.get('Content-Length');
-      const reader = res.body.getReader();
-      const chunks = [];
-      let loaded = 0;
+    // Typing state
+    const lines = [
+      'public class Main {',
+      '  // keep systems alive',
+      '  run(); fix(); deploy();',
+      '}',
+    ];
+    let lineIdx = 0, charIdx = 0, typedLines = [];
+    let typeTimer = 0;
 
-      function pump() {
-        return reader.read().then(({ done, value }) => {
-          if (done) return;
-          chunks.push(value);
-          loaded += value.length;
-          const pct = total ? (loaded / total) * 100 : 0;
-          setProgress(Math.min(pct, 99));
-          return pump();
-        });
+    // Coffee cup steam particles
+    const steam = [
+      { x: 0, y: 0, life: 0, maxLife: 60 },
+      { x: 0, y: 0, life: 20, maxLife: 60 },
+      { x: 0, y: 0, life: 40, maxLife: 60 },
+    ];
+
+    function drawScene() {
+      ctx.clearRect(0, 0, W, H);
+
+      // ── Monitor (drawn first — furthest back) ─────────────────────
+      const monX = 95, monY = 38, monW = 210, monH = 128;
+      // outer bezel
+      ctx.fillStyle = '#1a1a1a';
+      ctx.beginPath(); ctx.roundRect(monX - 8, monY - 8, monW + 16, monH + 16, 8); ctx.fill();
+      // screen bg
+      ctx.fillStyle = '#060d18';
+      ctx.beginPath(); ctx.roundRect(monX, monY, monW, monH, 4); ctx.fill();
+
+      // screen glow pulse
+      const monGlowA = 0.14 + Math.sin(t * 0.8) * 0.04;
+      const monGlow = ctx.createRadialGradient(monX + monW/2, monY + monH/2, 10, monX + monW/2, monY + monH/2, 160);
+      monGlow.addColorStop(0, `rgba(245,208,0,${monGlowA})`);
+      monGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = monGlow;
+      ctx.beginPath(); ctx.roundRect(monX, monY, monW, monH, 4); ctx.fill();
+
+      // ambient screen glow cast outward (illuminates scene)
+      const ambientGlow = ctx.createRadialGradient(monX + monW/2, monY + monH, 0, monX + monW/2, monY + monH, 200);
+      ambientGlow.addColorStop(0, 'rgba(245,208,0,0.07)');
+      ambientGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = ambientGlow; ctx.fillRect(0, 0, W, H);
+
+      // ── Code on screen ────────────────────────────────────────────
+      ctx.save();
+      ctx.beginPath(); ctx.rect(monX + 4, monY + 4, monW - 8, monH - 8); ctx.clip();
+      ctx.fillStyle = 'rgba(255,255,255,0.05)';
+      ctx.fillRect(monX + 4, monY + 4, 18, monH - 8);
+      const codeColors = ['#7dd3fc','#f5d000','#86efac','#f5d000','#e0e0e0'];
+      const lineH = 16;
+      typedLines.forEach((line, i) => {
+        ctx.fillStyle = 'rgba(255,255,255,0.18)';
+        ctx.font = '9px "DM Mono", monospace';
+        ctx.textAlign = 'right';
+        ctx.fillText(i + 1, monX + 20, monY + 16 + i * lineH);
+        ctx.fillStyle = codeColors[i % codeColors.length];
+        ctx.textAlign = 'left';
+        ctx.font = '9.5px "DM Mono", monospace';
+        ctx.fillText(line, monX + 26, monY + 16 + i * lineH);
+      });
+      if (Math.floor(t * 1.5) % 2 === 0 && lineIdx < lines.length) {
+        const curLine = typedLines.length - 1;
+        if (curLine >= 0) {
+          const curX = monX + 26 + ctx.measureText(typedLines[curLine]).width;
+          const curY = monY + 6 + curLine * lineH;
+          ctx.fillStyle = 'rgba(245,208,0,0.9)';
+          ctx.fillRect(curX + 1, curY, 5, 11);
+        }
+      }
+      ctx.restore();
+
+      // monitor power LED
+      ctx.fillStyle = `rgba(40,200,100,${0.7 + Math.sin(t) * 0.3})`;
+      ctx.beginPath(); ctx.arc(monX + monW - 8, monY + monH + 4, 2.5, 0, Math.PI * 2); ctx.fill();
+
+      // ── Monitor stand ─────────────────────────────────────────────
+      ctx.fillStyle = '#1e1e1e';
+      ctx.fillRect(185, monY + monH + 8, 30, 20);
+      ctx.fillRect(165, monY + monH + 26, 70, 8);
+
+      // ── Desk surface ──────────────────────────────────────────────
+      ctx.fillStyle = '#1c1a14';
+      ctx.beginPath(); ctx.roundRect(40, 240, 320, 18, 4); ctx.fill();
+      ctx.fillStyle = 'rgba(245,208,0,0.07)';
+      ctx.fillRect(40, 240, 320, 2);
+      ctx.fillStyle = '#181610';
+      ctx.fillRect(65, 258, 12, 52);
+      ctx.fillRect(323, 258, 12, 52);
+
+      // ── Keyboard ──────────────────────────────────────────────────
+      ctx.fillStyle = '#191919';
+      ctx.beginPath(); ctx.roundRect(128, 228, 144, 14, 3); ctx.fill();
+      for (let row = 0; row < 2; row++) {
+        for (let k = 0; k < 12; k++) {
+          const kx = 133 + k * 11 + (row === 1 ? 5 : 0);
+          const ky = 230 + row * 6;
+          const isPressed = Math.floor(t * 6) % 24 === k + row * 12;
+          ctx.fillStyle = isPressed ? 'rgba(245,208,0,0.55)' : 'rgba(255,255,255,0.07)';
+          ctx.beginPath(); ctx.roundRect(kx, ky, 9, 4, 1); ctx.fill();
+        }
       }
 
-      return pump().then(() => {
-        setProgress(100);
-        const blob = new Blob(chunks);
-        return blob.text();
-      }).then(text => JSON.parse(text));
-    })
-    .then(world => {
-      const globe = Globe()
-        .width(window.innerWidth)
-        .height(window.innerHeight)
-        .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-dark.jpg')
-        .backgroundImageUrl(null)
-        .backgroundColor('#0a0a0a')
-        .polygonsData(world.features)
-        .polygonAltitude(0.005)
-        .polygonCapColor(d => VISITED.includes(d.properties.ISO_A2) ? '#f5d000' : 'rgba(255,255,255,0.04)')
-        .polygonSideColor(() => 'rgba(255,255,255,0.02)')
-        .polygonStrokeColor(() => 'rgba(255,255,255,0.06)')
-        .polygonLabel(d => VISITED.includes(d.properties.ISO_A2)
-          ? `<div style="font-family:'DM Mono',monospace;font-size:0.75rem;background:#1a1a1a;border:1px solid rgba(245,208,0,0.4);color:#f5d000;padding:0.3rem 0.6rem;border-radius:4px;">${d.properties.NAME}</div>`
-          : '')
-        .pointOfView({ lat: 20, lng: 80, altitude: 2.5 })
-        (container);
-
-      globe.controls().autoRotate = true;
-      globe.controls().autoRotateSpeed = 0.5;
-      globe.controls().enableZoom = true;
-
-      // Pause auto-rotate on drag, resume after 3s idle
-      let idleTimer;
-      container.addEventListener('pointerdown', () => {
-        globe.controls().autoRotate = false;
-        clearTimeout(idleTimer);
-      });
-      container.addEventListener('pointerup', () => {
-        idleTimer = setTimeout(() => { globe.controls().autoRotate = true; }, 3000);
+      // ── Coffee cup (right side of desk) ───────────────────────────
+      const cupX = 338, cupY = 208;
+      ctx.fillStyle = '#2a2a2a';
+      ctx.beginPath();
+      ctx.moveTo(cupX, cupY); ctx.lineTo(cupX + 3, cupY + 26);
+      ctx.lineTo(cupX + 22, cupY + 26); ctx.lineTo(cupX + 25, cupY);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(cupX + 28, cupY + 13, 7, -0.8, 0.8); ctx.stroke();
+      ctx.fillStyle = '#4a2c00';
+      ctx.fillRect(cupX + 2, cupY + 4, 21, 18);
+      steam.forEach((s, i) => {
+        s.life += 0.4;
+        if (s.life > s.maxLife) s.life = 0;
+        const prog = s.life / s.maxLife;
+        const sx = cupX + 8 + i * 5 + Math.sin(prog * Math.PI * 3 + i) * 3;
+        const sy = cupY - prog * 22;
+        const alpha = prog < 0.5 ? prog * 2 * 0.4 : (1 - prog) * 2 * 0.4;
+        ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+        ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(sx, sy + 10);
+        ctx.quadraticCurveTo(sx + 4, sy + 5, sx, sy); ctx.stroke();
       });
 
-      window.addEventListener('resize', () => {
-        globe.width(window.innerWidth).height(window.innerHeight);
+      // ── Person — back view, centered, facing monitor ──────────────
+      const px = 200, py = 158; // py = head center
+
+      // Chair back panel (behind body)
+      ctx.fillStyle = '#141414';
+      ctx.beginPath(); ctx.roundRect(px - 30, py + 45, 60, 72, 5); ctx.fill();
+      ctx.fillStyle = '#1c1c1c';
+      ctx.beginPath(); ctx.roundRect(px - 26, py + 49, 52, 64, 4); ctx.fill();
+      // chair headrest
+      ctx.fillStyle = '#1a1a1a';
+      ctx.beginPath(); ctx.roundRect(px - 18, py + 42, 36, 14, 4); ctx.fill();
+      // chair seat
+      ctx.fillStyle = '#1e1e1e';
+      ctx.beginPath(); ctx.roundRect(px - 34, py + 112, 68, 16, 4); ctx.fill();
+      // chair legs
+      ctx.fillStyle = '#181818';
+      ctx.fillRect(px - 30, py + 127, 8, 44);
+      ctx.fillRect(px + 22, py + 127, 8, 44);
+
+      // Body — hoodie back
+      ctx.fillStyle = '#2d2d3a';
+      ctx.beginPath();
+      ctx.moveTo(px - 30, py + 114);
+      ctx.lineTo(px - 38, py + 42);
+      ctx.quadraticCurveTo(px - 32, py + 26, px - 17, py + 21);
+      ctx.lineTo(px + 17, py + 21);
+      ctx.quadraticCurveTo(px + 32, py + 26, px + 38, py + 42);
+      ctx.lineTo(px + 30, py + 114);
+      ctx.closePath(); ctx.fill();
+      // center back seam
+      ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(px, py + 23); ctx.lineTo(px, py + 114); ctx.stroke();
+      // hood bunched at back of collar
+      ctx.fillStyle = '#252535';
+      ctx.beginPath();
+      ctx.moveTo(px - 17, py + 21);
+      ctx.quadraticCurveTo(px, py + 36, px + 17, py + 21);
+      ctx.quadraticCurveTo(px, py + 29, px - 17, py + 21);
+      ctx.fill();
+
+      // Neck
+      ctx.fillStyle = '#c8a882';
+      ctx.beginPath(); ctx.roundRect(px - 8, py + 8, 16, 16, 4); ctx.fill();
+
+      // Head — back view, subtle forward lean toward monitor
+      const headLean = Math.sin(t * 0.5) * 0.8;
+      ctx.fillStyle = '#c8a882'; // tiny skin strip at base
+      ctx.beginPath(); ctx.ellipse(px, py - 8 + headLean, 21, 23, 0, 0, Math.PI * 2); ctx.fill();
+      // hair covers full back of head
+      ctx.fillStyle = '#1a1008';
+      ctx.beginPath(); ctx.ellipse(px, py - 12 + headLean, 21, 21, 0, 0, Math.PI * 2); ctx.fill();
+      // hair shine highlight
+      ctx.fillStyle = 'rgba(255,230,120,0.07)';
+      ctx.beginPath(); ctx.ellipse(px - 5, py - 19 + headLean, 9, 7, -0.5, 0, Math.PI * 2); ctx.fill();
+      // ears (slightly visible)
+      ctx.fillStyle = '#b8956e';
+      ctx.beginPath(); ctx.ellipse(px - 20, py - 5 + headLean, 4, 6, 0.15, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(px + 20, py - 5 + headLean, 4, 6, -0.15, 0, Math.PI * 2); ctx.fill();
+
+      // Arms — reaching forward/down to keyboard, typing bob
+      const armBob = Math.sin(t * 6) * 2;
+      ctx.fillStyle = '#2d2d3a';
+      // left arm
+      ctx.beginPath();
+      ctx.moveTo(px - 38, py + 44);
+      ctx.quadraticCurveTo(px - 60, py + 62, px - 54, py + 76 + armBob);
+      ctx.lineTo(px - 42, py + 76 + armBob);
+      ctx.quadraticCurveTo(px - 46, py + 62, px - 26, py + 44);
+      ctx.closePath(); ctx.fill();
+      // right arm
+      ctx.beginPath();
+      ctx.moveTo(px + 38, py + 44);
+      ctx.quadraticCurveTo(px + 60, py + 62, px + 54, py + 76 - armBob);
+      ctx.lineTo(px + 42, py + 76 - armBob);
+      ctx.quadraticCurveTo(px + 46, py + 62, px + 26, py + 44);
+      ctx.closePath(); ctx.fill();
+      // hands on keyboard
+      ctx.fillStyle = '#c8a882';
+      ctx.beginPath(); ctx.ellipse(px - 48, py + 80 + armBob, 11, 7, 0.25, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(px + 48, py + 80 - armBob, 11, 7, -0.25, 0, Math.PI * 2); ctx.fill();
+
+      // ── Screen light cast on person's back ────────────────────────
+      const backLight = ctx.createRadialGradient(px, py - 10, 0, px, py - 10, 90);
+      backLight.addColorStop(0, 'rgba(245,208,0,0.06)');
+      backLight.addColorStop(1, 'transparent');
+      ctx.fillStyle = backLight;
+      ctx.fillRect(px - 90, py - 90, 180, 180);
+
+      // ── Floating code snippets (sides of monitor) ─────────────────
+      ctx.font = '9.5px "DM Mono", monospace';
+      snippets.forEach((s, i) => {
+        s.y -= s.speed;
+        if (s.y < -10) s.y = 230 + Math.random() * 50;
+        const alpha = s.opacity * (0.6 + Math.sin(t * 0.8 + i) * 0.3);
+        ctx.fillStyle = i % 2 === 0
+          ? `rgba(245,208,0,${alpha})`
+          : `rgba(125,211,252,${alpha})`;
+        ctx.textAlign = 'left';
+        ctx.fillText(s.text, s.x, s.y);
       });
 
-      loading.classList.add('hidden');
-    })
-    .catch(() => {
-      loading.innerHTML = '<p style="font-family:\'DM Mono\',monospace;font-size:0.8rem;color:#7a7a85;">Could not load map. Check your connection.</p>';
+      t += 0.045;
+    }
+
+    // Typing animation — advances one char per ~80ms
+    function typeStep() {
+      if (lineIdx >= lines.length) return;
+      const line = lines[lineIdx];
+      if (charIdx === 0) typedLines.push('');
+      typedLines[lineIdx] = line.slice(0, charIdx + 1);
+      charIdx++;
+      if (charIdx >= line.length) {
+        charIdx = 0; lineIdx++;
+      }
+      setTimeout(typeStep, 65 + Math.random() * 55);
+    }
+    setTimeout(typeStep, 800);
+
+    function loop() { drawScene(); requestAnimationFrame(loop); }
+    loop();
+  })();
+
+  // ── Loading screen ────────────────────────────────────────────────────
+  (function(){
+    const screen     = document.getElementById('loading-screen');
+    const bar        = document.getElementById('loader-bar');
+    const percent    = document.getElementById('loader-percent');
+    const enterBtn   = document.getElementById('loader-enter-btn');
+    let prog = 0;
+    const messages = ['Initializing systems...', 'Loading assets...', 'Almost ready...'];
+    const label = document.querySelector('.loader-label');
+    const interval = setInterval(() => {
+      prog += Math.random() * 18 + 6;
+      if (prog >= 100) prog = 100;
+      bar.style.width = prog + '%';
+      percent.textContent = Math.floor(prog) + '%';
+      if (prog > 40) label.textContent = messages[1];
+      if (prog > 75) label.textContent = messages[2];
+      if (prog >= 100) {
+        clearInterval(interval);
+        percent.textContent = '100%';
+        label.textContent = 'Ready.';
+        setTimeout(() => {
+          enterBtn.style.display = 'inline-flex';
+          requestAnimationFrame(() => { enterBtn.style.opacity = '1'; });
+        }, 300);
+      }
+    }, 120);
+
+    const enterSound = new Audio('Audio Track.mp3');
+    enterSound.volume = 0.6;
+
+    enterBtn.addEventListener('click', () => {
+      enterSound.currentTime = 0;
+      enterSound.play().catch(() => {});
+      // Prime the hover audio on this user gesture so it plays immediately on hover
+      hoverSound.play().then(() => hoverSound.pause()).catch(() => {});
+      hoverSound.currentTime = 0;
+      screen.classList.add('hidden');
     });
+  })();
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Hamburger menu toggle
+  const hamburger = document.getElementById('hamburger');
+  const navLinks = document.getElementById('nav-links');
+  if (hamburger) {
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      navLinks.classList.toggle('open');
+    });
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        navLinks.classList.remove('open');
+      });
+    });
+  }
+
+  // ── Dot fields for locked cards ──────────────────────────────────────
+  ['dots-ngo','dots-sme','dots-breakout','dots-halberd','dots-tbc','dots-smart-restaurant','dots-mytransactions'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    for (let i = 0; i < 40; i++) {
+      const s = document.createElement('span');
+      s.style.left  = Math.random() * 100 + '%';
+      s.style.top   = Math.random() * 100 + '%';
+      s.style.opacity = (Math.random() * 0.4 + 0.1).toString();
+      el.appendChild(s);
+    }
+  });
+
+  // ── Pong canvas preview ───────────────────────────────────────────────
+  (function(){
+    const canvas = document.getElementById('pong-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const wrap = canvas.parentElement;
+
+    const STAGES = [
+      { label:'NEON', bg:'#050d14', ballColors:['#ffea00','#ff3f6c','#00ffe7','#a78bfa'], padL:'#ffea00', padR:'#ff3f6c',
+        drawCourt(ctx,W,H){ ctx.save(); ctx.setLineDash([H*.04,H*.03]); ctx.strokeStyle='#0d3040'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H); ctx.stroke(); ctx.restore(); },
+        drawPaddle(ctx,x,y,w,h,c){ ctx.shadowBlur=16; ctx.shadowColor=c; const g=ctx.createLinearGradient(x,0,x+w,0); g.addColorStop(0,c); g.addColorStop(1,c+'88'); ctx.fillStyle=g; ctx.beginPath(); ctx.roundRect(x,y,w,h,w/2); ctx.fill(); ctx.shadowBlur=0; },
+        drawBall(ctx,bx,by,br,c){ ctx.shadowBlur=20; ctx.shadowColor=c; ctx.fillStyle=c; ctx.beginPath(); ctx.arc(bx,by,br,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0; }
+      },
+      { label:'GRASS', bg:'#2a7a38', ballColors:['#ffffff'], padL:'#ffffff', padR:'#ffffff',
+        drawCourt(ctx,W,H){ ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=2; ctx.setLineDash([]); ctx.strokeRect(8,8,W-16,H-16); ctx.beginPath(); ctx.moveTo(W/2,12); ctx.lineTo(W/2,H-12); ctx.stroke(); },
+        drawPaddle(ctx,x,y,w,h,c){ ctx.fillStyle=c; ctx.beginPath(); ctx.roundRect(x,y,w,h,3); ctx.fill(); },
+        drawBall(ctx,bx,by,br,c){ ctx.fillStyle=c; ctx.beginPath(); ctx.arc(bx,by,br,0,Math.PI*2); ctx.fill(); }
+      },
+      { label:'CLAY', bg:'#b5541e', ballColors:['#ffffff'], padL:'#ffffff', padR:'#ffffff',
+        drawCourt(ctx,W,H){ ctx.strokeStyle='rgba(255,255,255,.75)'; ctx.lineWidth=2; ctx.setLineDash([]); ctx.strokeRect(8,8,W-16,H-16); ctx.beginPath(); ctx.moveTo(W/2,12); ctx.lineTo(W/2,H-12); ctx.stroke(); },
+        drawPaddle(ctx,x,y,w,h,c){ ctx.fillStyle=c; ctx.beginPath(); ctx.roundRect(x,y,w,h,3); ctx.fill(); },
+        drawBall(ctx,bx,by,br,c){ ctx.fillStyle=c; ctx.beginPath(); ctx.arc(bx,by,br,0,Math.PI*2); ctx.fill(); }
+      },
+      { label:'CLASSIC', bg:'#000000', ballColors:['#ffffff'], padL:'#ffffff', padR:'#ffffff',
+        drawCourt(ctx,W,H){ ctx.fillStyle='#fff'; const sH=H*.05,gap=H*.04; let y=gap; while(y<H){ ctx.fillRect(W/2-1,y,2,sH); y+=sH+gap; } },
+        drawPaddle(ctx,x,y,w,h,c){ ctx.fillStyle=c; ctx.fillRect(x,y,w,h); },
+        drawBall(ctx,bx,by,br,c){ ctx.fillStyle=c; ctx.fillRect(bx-br,by-br,br*2,br*2); }
+      }
+    ];
+
+    function size(){ canvas.width = wrap.clientWidth||300; canvas.height = wrap.clientHeight||160; }
+    requestAnimationFrame(()=>{ size(); initBall(); });
+    window.addEventListener('resize', size);
+
+    let si=0, bci=0, bx=150, by=80, vx=2, vy=1.4, pa=60, pb=60;
+    const PW=7, PH=38;
+    function initBall(){ const W=canvas.width,H=canvas.height; bx=W/2; by=H/2; vx=(Math.random()>.5?1:-1)*2; vy=(Math.random()>.5?1:-1)*1.4; pa=H/2-PH/2; pb=H/2-PH/2; }
+
+    const labelEl = document.getElementById('pong-stage-label');
+    const dots = document.querySelectorAll('#pong-canvas ~ .stage-tabs .stage-dot');
+    function setStage(i){ si=i; bci=0; if(labelEl) labelEl.textContent=STAGES[i].label; dots.forEach((d,j)=>d.classList.toggle('active',j===i)); }
+    setStage(0);
+    dots.forEach(d=>{ d.addEventListener('click',e=>{ e.stopPropagation(); setStage(parseInt(d.dataset.stage)); clearInterval(pongTimer); pongTimer=setInterval(()=>setStage((si+1)%4),3000); }); });
+    let pongTimer = setInterval(()=>setStage((si+1)%4),3000);
+
+    function draw(){
+      const s=STAGES[si], W=canvas.width, H=canvas.height, bc=s.ballColors[bci%s.ballColors.length];
+      ctx.fillStyle=s.bg; ctx.fillRect(0,0,W,H);
+      s.drawCourt(ctx,W,H);
+      s.drawPaddle(ctx,PW*2,pa,PW,PH,s.padL);
+      s.drawPaddle(ctx,W-PW*3,pb,PW,PH,s.padR);
+      s.drawBall(ctx,bx,by,5,bc);
+      bx+=vx; by+=vy;
+      if(by<5||by>H-5) vy*=-1;
+      pa+=(by-pa-PH/2)*.07; pb+=(by-pb-PH/2)*.055;
+      pa=Math.max(0,Math.min(H-PH,pa)); pb=Math.max(0,Math.min(H-PH,pb));
+      if(bx<PW*3+6&&by>pa&&by<pa+PH){ vx=Math.abs(vx); bci++; }
+      if(bx>W-PW*3-6&&by>pb&&by<pb+PH){ vx=-Math.abs(vx); bci++; }
+      if(bx<0||bx>W){ bx=W/2; by=H/2+(Math.random()*40-20); vx=(Math.random()>.5?1:-1)*2; vy=(Math.random()>.5?1:-1)*1.4; }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+
+  // ── Wedding K & N canvas ──────────────────────────────────────────────
+  (function(){
+    const canvas = document.getElementById('wedding-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const wrap = canvas.parentElement;
+    function size(){ canvas.width=wrap.clientWidth||300; canvas.height=wrap.clientHeight||160; }
+    requestAnimationFrame(size);
+    window.addEventListener('resize', size);
+    let t = 0;
+    function loop(){
+      const W=canvas.width, H=canvas.height;
+      t += 0.025;
+
+      ctx.fillStyle='#0d0a08'; ctx.fillRect(0,0,W,H);
+
+      // Soft radial glow
+      const rg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*.45);
+      rg.addColorStop(0,'rgba(212,175,55,0.1)'); rg.addColorStop(1,'transparent');
+      ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
+
+      // Decorative side lines
+      ctx.strokeStyle='rgba(212,175,55,0.2)'; ctx.lineWidth=0.8;
+      ctx.beginPath(); ctx.moveTo(W*.08,H/2); ctx.lineTo(W*.32,H/2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(W*.68,H/2); ctx.lineTo(W*.92,H/2); ctx.stroke();
+
+      // K & N — gentle glow pulse
+      const pulse = 0.88 + Math.sin(t) * 0.1;
+      ctx.shadowBlur = 22 * pulse;
+      ctx.shadowColor = 'rgba(245,208,0,0.55)';
+      ctx.fillStyle = `rgba(245,208,0,${pulse})`;
+      ctx.font = `italic bold ${Math.floor(H*0.42)}px Georgia, 'Times New Roman', serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('K & N', W/2, H/2 - H*0.06);
+      ctx.shadowBlur = 0;
+
+      // Date
+      ctx.fillStyle='rgba(255,255,255,0.28)';
+      ctx.font = `${Math.floor(H*0.09)}px 'DM Mono', monospace`;
+      ctx.fillText('April 18, 2026', W/2, H/2 + H*0.3);
+
+      // Decorative dots ✦
+      ctx.fillStyle='rgba(245,208,0,0.35)';
+      [-18,0,18].forEach(dx=>{
+        ctx.beginPath(); ctx.arc(W/2+dx, H/2+H*0.46, 1.8, 0, Math.PI*2); ctx.fill();
+      });
+
+      requestAnimationFrame(loop);
+    }
+    loop();
+  })();
+
+  // ── EasyBook booking canvas ───────────────────────────────────────────
+  (function(){
+    const canvas = document.getElementById('easybook-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const wrap = canvas.parentElement;
+    function size(){ canvas.width=wrap.clientWidth||300; canvas.height=wrap.clientHeight||160; }
+    requestAnimationFrame(size);
+    window.addEventListener('resize', size);
+    const SLOTS = ['09:00 AM','11:30 AM','02:00 PM','04:30 PM'];
+    const BOOKED = [true, false, true, false];
+    let t = 0, highlighted = 1;
+    function loop(){
+      const W=canvas.width, H=canvas.height;
+      t += 0.018;
+      ctx.fillStyle='#070c12'; ctx.fillRect(0,0,W,H);
+      const rg = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*.5);
+      rg.addColorStop(0,'rgba(245,208,0,0.05)'); rg.addColorStop(1,'transparent');
+      ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='rgba(245,208,0,0.55)';
+      ctx.font=`bold ${Math.floor(H*0.09)}px 'DM Mono',monospace`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('BOOK APPOINTMENT', W/2, H*0.11);
+      const sH=H*0.155, sW=W*0.72, sx=(W-sW)/2, sy=H*0.24, gap=4;
+      highlighted = Math.floor(t/2.2) % SLOTS.length;
+      SLOTS.forEach((label,i)=>{
+        const y=sy+i*(sH+gap);
+        const pulse=0.7+Math.sin(t*2)*0.28;
+        const isActive=i===highlighted && !BOOKED[i];
+        ctx.fillStyle=BOOKED[i]?'rgba(40,200,100,0.12)':isActive?`rgba(245,208,0,${0.13*pulse})`:'rgba(255,255,255,0.04)';
+        ctx.strokeStyle=BOOKED[i]?'rgba(40,200,100,0.45)':isActive?`rgba(245,208,0,${0.55*pulse})`:'rgba(255,255,255,0.1)';
+        ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(sx,y,sW,sH,3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle=BOOKED[i]?'#28c864':isActive?`rgba(245,208,0,${pulse})`:'rgba(255,255,255,0.38)';
+        ctx.font=`${Math.floor(H*0.082)}px 'DM Mono',monospace`;
+        ctx.textAlign='left'; ctx.textBaseline='middle';
+        ctx.fillText(label, sx+10, y+sH/2);
+        if(BOOKED[i]){
+          ctx.fillStyle='rgba(40,200,100,0.85)';
+          ctx.textAlign='right';
+          ctx.fillText('✓ Booked', sx+sW-10, y+sH/2);
+        }
+      });
+      requestAnimationFrame(loop);
+    }
+    loop();
+  })();
+
+  // ── Bingo balls canvas ────────────────────────────────────────────────
+  (function(){
+    const canvas = document.getElementById('bingo-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const wrap = canvas.parentElement;
+    function size(){ canvas.width=wrap.clientWidth||300; canvas.height=wrap.clientHeight||160; }
+    requestAnimationFrame(size);
+    window.addEventListener('resize', size);
+    const COLS=['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#e91e63'];
+    const balls = Array.from({length:8},(_, i)=>({
+      x:Math.random()*260+20, y:Math.random()*120+20, r:14,
+      vx:(Math.random()-.5)*2, vy:(Math.random()-.5)*2,
+      col:COLS[i], num:Math.floor(Math.random()*75)+1
+    }));
+    function loop(){
+      const W=canvas.width, H=canvas.height;
+      ctx.fillStyle='#08080e'; ctx.fillRect(0,0,W,H);
+      balls.forEach(b=>{
+        b.x+=b.vx; b.y+=b.vy;
+        if(b.x<b.r||b.x>W-b.r) b.vx*=-1;
+        if(b.y<b.r||b.y>H-b.r) b.vy*=-1;
+        ctx.shadowBlur=12; ctx.shadowColor=b.col;
+        ctx.fillStyle=b.col; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
+        ctx.shadowBlur=0;
+        ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.beginPath(); ctx.arc(b.x,b.y,b.r*.58,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#111'; ctx.font=`bold ${b.r*.7}px monospace`; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(b.num,b.x,b.y);
+      });
+      requestAnimationFrame(loop);
+    }
+    loop();
+  })();
+
+  // ── SurgiMatch preview canvas ─────────────────────────────────────────
+  (function(){
+    const canvas = document.getElementById('surgimatch-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const wrap = canvas.parentElement;
+    function size(){ canvas.width=wrap.clientWidth||300; canvas.height=wrap.clientHeight||160; }
+    requestAnimationFrame(size);
+    window.addEventListener('resize', size);
+    let t = 0;
+    function loop(){
+      const W=canvas.width, H=canvas.height;
+      t += 0.018;
+      ctx.fillStyle='#0a1628'; ctx.fillRect(0,0,W,H);
+
+      const pulse=0.82+Math.sin(t*1.1)*0.12;
+      ctx.fillStyle=`rgba(232,238,246,${pulse})`;
+      ctx.font=`bold ${Math.floor(H*0.1)}px 'DM Mono',monospace`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('SurgiMatch', W/2, H*0.13);
+
+      ctx.fillStyle='rgba(160,188,212,0.78)';
+      ctx.font=`${Math.floor(H*0.062)}px 'DM Mono',monospace`;
+      ctx.fillText('Find your surgeon', W/2, H*0.26);
+
+      const lx=W*0.2, rx=W*0.8, cy=H*0.62, r=Math.min(H*0.13, W*0.11);
+      const flow=0.35+Math.sin(t*1.6)*0.35;
+      ctx.strokeStyle=`rgba(232,196,80,${0.45+flow*0.4})`;
+      ctx.lineWidth=2;
+      ctx.setLineDash([5,7]); ctx.lineDashOffset=-t*18;
+      ctx.beginPath(); ctx.moveTo(lx+r*0.85, cy); ctx.lineTo(rx-r*0.85, cy); ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle='rgba(30,70,110,0.4)'; ctx.strokeStyle='rgba(120,170,220,0.45)'; ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.arc(lx,cy,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle='#a8c8e8'; ctx.font=`${Math.floor(r*0.95)}px sans-serif`;
+      ctx.fillText('◉', lx, cy+1);
+
+      ctx.fillStyle='rgba(32,100,90,0.42)'; ctx.strokeStyle='rgba(100,200,180,0.45)';
+      ctx.beginPath(); ctx.arc(rx,cy,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle='#7dd3c0'; ctx.font=`${Math.floor(r*0.72)}px sans-serif`;
+      ctx.fillText('✚', rx, cy+1);
+
+      const mx=W/2, pm=7+flow*4;
+      ctx.shadowBlur=16*flow; ctx.shadowColor='rgba(245,208,0,0.4)';
+      ctx.fillStyle='#f0d060';
+      ctx.beginPath(); ctx.arc(mx,cy,pm,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0;
+      ctx.fillStyle='#0a1628'; ctx.font=`bold ${pm*1.15}px monospace`;
+      ctx.fillText('→', mx, cy+pm*0.32);
+
+      requestAnimationFrame(loop);
+    }
+    loop();
+  })();
+
+  // ── Animated stat counters ───────────────────────────────────────────
+  const statObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      const target = parseInt(el.dataset.target, 10);
+      const duration = 1600;
+      const startTime = performance.now();
+      function tick(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // ease-out cubic
+        const ease = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.floor(ease * target);
+        if (progress < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          el.textContent = target;
+        }
+      }
+      requestAnimationFrame(tick);
+      statObserver.unobserve(el);
+    });
+  }, { threshold: 0.6 });
+
+  document.querySelectorAll('.stat-num').forEach(el => {
+    if (!el.closest('.terminal-box')) statObserver.observe(el);
+  });
+
+  // ── Terminal stats reveal ─────────────────────────────────────────────
+  function animateStatNum(el) {
+    const target = parseInt(el.dataset.target, 10);
+    const duration = 1200;
+    const start = performance.now();
+    function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.floor(ease * target);
+      if (p < 1) requestAnimationFrame(tick);
+      else el.textContent = target;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  const termObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      termObserver.unobserve(entry.target);
+      const delays = [400, 900, 1400, 1900, 2400];
+      const ids = ['term-out-1','term-out-2','term-out-3','term-out-4','term-out-5','term-out-done'];
+      ids.forEach((id, i) => {
+        setTimeout(() => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.style.display = 'flex';
+          el.style.flexDirection = 'column';
+          el.style.opacity = '0';
+          el.style.transition = 'opacity 0.3s ease';
+          requestAnimationFrame(() => { el.style.opacity = '1'; });
+          if (i < 5) {
+            const statEl = el.querySelector('.stat-num');
+            if (statEl) animateStatNum(statEl);
+          }
+        }, delays[i] ?? 1900);
+      });
+    });
+  }, { threshold: 0.4 });
+
+  const termBox = document.querySelector('.terminal-box');
+  if (termBox) termObserver.observe(termBox);
+
+  // ── Project card hover sound ──────────────────────────────────────────
+  let soundMuted = false;
+
+  // Pre-load the hover sound
+  const hoverSound = new Audio('Audio Track-2.mp3');
+  hoverSound.volume = 0.35;
+  hoverSound.preload = 'auto';
+
+  function playHoverSound() {
+    if (soundMuted) return;
+    try {
+      hoverSound.currentTime = 0;
+      hoverSound.play().catch(() => {});
+    } catch(e) {}
+  }
+
+  document.querySelectorAll('.project-card').forEach(card => {
+    card.addEventListener('mouseenter', playHoverSound);
+  });
+
+  // ── Hobby Tab Panel ──────────────────────────────────────────────────────
+  const hobbyTabs   = document.querySelectorAll('.hobby-tab');
+  const hobbyPanels = document.querySelectorAll('.hobby-panel');
+
+  hobbyTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      hobbyTabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+      hobbyPanels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+      playHoverSound();
+    });
+  });
+
+  // ── Gaming panel typewriter ───────────────────────────────────────────
+  const typewriterEl = document.getElementById('gaming-typewriter-text');
+  const typewriterText = typewriterEl ? typewriterEl.dataset.text : '';
+  let typewriterTimer = null;
+  let typewriterDone = false;
+
+  function runTypewriter() {
+    if (!typewriterEl || typewriterDone) return;
+    typewriterEl.textContent = '';
+    typewriterEl.classList.remove('done');
+    let i = 0;
+    clearInterval(typewriterTimer);
+    typewriterTimer = setInterval(() => {
+      typewriterEl.textContent += typewriterText[i];
+      i++;
+      if (i >= typewriterText.length) {
+        clearInterval(typewriterTimer);
+        typewriterEl.classList.add('done');
+        typewriterDone = true;
+      }
+    }, 28);
+  }
+
+  // Run on page load since Gaming is the default active tab
+  runTypewriter();
+
+  // Re-run whenever the Gaming tab is clicked
+  const gamingTab = document.querySelector('.hobby-tab[data-tab="gaming"]');
+  if (gamingTab) {
+    gamingTab.addEventListener('click', () => {
+      typewriterDone = false;
+      runTypewriter();
+    });
+  }
+
+  // ── Tech panel typewriter ─────────────────────────────────────────────
+  const techTypewriterEl = document.getElementById('tech-typewriter-text');
+  const techTypewriterText = techTypewriterEl ? techTypewriterEl.dataset.text : '';
+  let techTypewriterTimer = null;
+  let techTypewriterDone = false;
+
+  function runTechTypewriter() {
+    if (!techTypewriterEl || techTypewriterDone) return;
+    techTypewriterEl.textContent = '';
+    techTypewriterEl.classList.remove('done');
+    let i = 0;
+    clearInterval(techTypewriterTimer);
+    techTypewriterTimer = setInterval(() => {
+      techTypewriterEl.textContent += techTypewriterText[i];
+      i++;
+      if (i >= techTypewriterText.length) {
+        clearInterval(techTypewriterTimer);
+        techTypewriterEl.classList.add('done');
+        techTypewriterDone = true;
+      }
+    }, 28);
+  }
+
+  const techTab = document.querySelector('.hobby-tab[data-tab="tech"]');
+  if (techTab) {
+    techTab.addEventListener('click', () => {
+      techTypewriterDone = false;
+      runTechTypewriter();
+    });
+  }
+
+  // ── Travel panel typewriter ───────────────────────────────────────────
+  const travelTypewriterEl = document.getElementById('travel-typewriter-text');
+  const travelTypewriterText = travelTypewriterEl ? travelTypewriterEl.dataset.text : '';
+  let travelTypewriterTimer = null;
+  let travelTypewriterDone = false;
+
+  function runTravelTypewriter() {
+    if (!travelTypewriterEl || travelTypewriterDone) return;
+    travelTypewriterEl.textContent = '';
+    travelTypewriterEl.classList.remove('done');
+    let i = 0;
+    clearInterval(travelTypewriterTimer);
+    travelTypewriterTimer = setInterval(() => {
+      travelTypewriterEl.textContent += travelTypewriterText[i];
+      i++;
+      if (i >= travelTypewriterText.length) {
+        clearInterval(travelTypewriterTimer);
+        travelTypewriterEl.classList.add('done');
+        travelTypewriterDone = true;
+      }
+    }, 28);
+  }
+
+  // ── Travel stat number slot-machine animation ─────────────────────────
+  const travelStatTargets = [9, 24, 4];
+
+  function animateTravelStats() {
+    const statEls = document.querySelectorAll('#panel-travel .travel-stat-number');
+    statEls.forEach((el, idx) => {
+      const target = travelStatTargets[idx];
+      const duration = 900;
+      const interval = 50;
+      const steps = duration / interval;
+      let step = 0;
+
+      el.textContent = Math.floor(Math.random() * 20);
+
+      const timer = setInterval(() => {
+        step++;
+        const progress = step / steps;
+        if (progress >= 1) {
+          clearInterval(timer);
+          el.textContent = target;
+        } else {
+          const max = Math.max(target + 10, 20);
+          el.textContent = Math.floor(Math.random() * max);
+        }
+      }, interval + idx * 60);
+    });
+  }
+
+  const travelTab = document.querySelector('.hobby-tab[data-tab="travel"]');
+  if (travelTab) {
+    travelTab.addEventListener('click', () => {
+      travelTypewriterDone = false;
+      runTravelTypewriter();
+      animateTravelStats();
+    });
+  }
+
+  // ── Gaming ID copy buttons ────────────────────────────────────────────
+  document.querySelectorAll('.gaming-id-copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const text = btn.dataset.copy;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg>';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+        }, 1800);
+      }).catch(() => {});
+    });
+  });
+
+  // ── Project button click sound ─────────────────────────────────────────
+  const projectBtnSound = new Audio('Audio Track.mp3');
+  projectBtnSound.volume = 0.5;
+
+  document.querySelectorAll('.project-card .btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (soundMuted) return;
+      projectBtnSound.currentTime = 0;
+      projectBtnSound.play().catch(() => {});
+    });
+  });
+
+  // Travel map button click sound
+  const travelMapBtn = document.querySelector('.travel-map-btn');
+  if (travelMapBtn) {
+    travelMapBtn.addEventListener('click', () => {
+      if (soundMuted) return;
+      projectBtnSound.currentTime = 0;
+      projectBtnSound.play().catch(() => {});
+    });
+  }
+
+  // Mute button toggle
+  const muteBtn = document.getElementById('mute-btn');
+  if (muteBtn) {
+    muteBtn.addEventListener('click', () => {
+      soundMuted = !soundMuted;
+      muteBtn.textContent = soundMuted ? '🔇' : '🔊';
+      muteBtn.style.color = soundMuted ? 'var(--muted)' : 'var(--accent)';
+      muteBtn.style.borderColor = soundMuted ? 'var(--border)' : 'rgba(245,208,0,0.4)';
+    });
+  }
+
+  // Formspree contact form
+  const form = document.getElementById('contact-form');
+  const status = document.getElementById('form-status');
+  const submitBtn = document.getElementById('submit-btn');
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      submitBtn.textContent = 'Sending...';
+      submitBtn.disabled = true;
+
+      const data = new FormData(form);
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: data,
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (res.ok) {
+          status.textContent = '✓ Message sent! I will get back to you soon.';
+          status.style.color = '#28c864';
+          status.style.display = 'block';
+          form.reset();
+        } else {
+          status.textContent = '✗ Something went wrong. Please try again.';
+          status.style.color = '#e24b4a';
+          status.style.display = 'block';
+        }
+      } catch {
+        status.textContent = '✗ Network error. Please check your connection.';
+        status.style.color = '#e24b4a';
+        status.style.display = 'block';
+      }
+
+      submitBtn.textContent = 'Send message →';
+      submitBtn.disabled = false;
+    });
+  }
+
 </script>
+
 </body>
 </html>
