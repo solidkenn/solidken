@@ -13,6 +13,19 @@
       --accent:#ff3f6c;
       --text:  #e0f7f4;
       --dim:   #1a3040;
+      --panel: #07111b;
+      --panel-soft: #0a1622;
+      --stroke: #1c3344;
+      --stroke-strong: #2a4f63;
+      --muted: #5f8596;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 24px;
     }
 
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -44,24 +57,194 @@
     .screen { display:none; flex-direction:column; align-items:center; justify-content:center; width:100%; }
     .screen.active { display:flex; }
 
-    /* ── MAIN MENU ───────────────────────────────────────── */
-    #menu-screen { gap:0; }
+    /* ── PAGINATED MENU ──────────────────────────────────── */
+    #menu-screen {
+      gap: 0;
+      overflow: hidden;
+      padding: 10px 0 14px;
+    }
+
+    /* Step progress indicator */
+    #menu-progress {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+    .progress-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: #173344;
+      box-shadow: inset 0 0 0 1px #204458;
+      transition: all .25s ease;
+    }
+    .progress-dot.active { background: var(--glow); box-shadow: 0 0 10px var(--glow), 0 0 20px rgba(0,255,231,0.35); transform: scale(1.1); }
+    .progress-dot.done   { background: #2b7a66; box-shadow: inset 0 0 0 1px #3f9b84; }
+    .progress-line {
+      width: 38px; height: 2px;
+      background: #173344;
+      transition: background .25s ease;
+    }
+    .progress-line.done { background: #2b7a66; }
+
+    /* Menu pages container */
+    #menu-pages {
+      width: min(600px, 94vw);
+      overflow: hidden;
+      position: relative;
+      padding: 14px;
+      border: 1px solid #112736;
+      border-radius: var(--radius-lg);
+      background:
+        linear-gradient(160deg, rgba(8,18,28,0.92), rgba(4,10,16,0.94));
+      box-shadow:
+        0 0 0 1px rgba(12, 34, 46, 0.7),
+        0 14px 34px rgba(0, 0, 0, 0.28),
+        inset 0 0 26px rgba(0, 255, 231, 0.03);
+    }
+    .menu-page {
+      display: none;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 100%;
+      animation: page-in .25s ease;
+    }
+    .menu-page.active { display: flex; }
+    @keyframes page-in {
+      from { opacity: 0; transform: translateX(14px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Step title */
+    .step-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(0.65rem, 1vw, 0.82rem);
+      letter-spacing: .23em;
+      color: #77a4b7;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      text-shadow: 0 0 8px rgba(0,255,231,0.08);
+    }
+
+    /* Menu nav buttons */
+    #menu-nav {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 14px;
+      margin-top: 16px;
+      width: min(600px, 94vw);
+    }
+    #menu-nav-left  { display: flex; justify-content: flex-start; }
+    #menu-nav-center{ display: flex; justify-content: center; }
+    #menu-nav-right { display: flex; justify-content: flex-end; }
+    #menu-back-btn {
+      background: none;
+      border: 1px solid #2a5b70;
+      color: #7db3c5;
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(0.74rem, 1.08vw, 0.92rem);
+      font-weight: 700;
+      letter-spacing: .2em;
+      padding: 11px 18px;
+      cursor: pointer;
+      text-shadow: 0 0 6px rgba(125,179,197,0.2);
+      box-shadow: 0 0 0 1px rgba(8, 22, 30, 0.7), inset 0 0 10px rgba(0,255,231,0.02);
+      transition: all .2s;
+      border-radius: var(--radius-md);
+      opacity: 0.85;
+    }
+    #menu-back-btn:hover { background: rgba(0,255,231,0.06); border-color: #3a7b93; color: #9fd8ea; }
+    #menu-back-btn:disabled { opacity: 0.24; pointer-events: none; }
+
+    #menu-next-btn {
+      background: linear-gradient(180deg, rgba(0,255,231,0.08), rgba(0,255,231,0.03));
+      border: 1px solid #43baa9;
+      color: #9efff4;
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(0.78rem, 1.1vw, 0.94rem);
+      font-weight: 700;
+      letter-spacing: .22em;
+      padding: 11px 20px;
+      cursor: pointer;
+      text-shadow: 0 0 9px rgba(0,255,231,0.5);
+      box-shadow: 0 0 0 1px rgba(15, 52, 59, 0.9), 0 0 16px rgba(0,255,231,0.16);
+      transition: all .2s ease;
+      border-radius: var(--radius-md);
+    }
+    #menu-next-btn:hover {
+      background: linear-gradient(180deg, rgba(0,255,231,0.16), rgba(0,255,231,0.05));
+      box-shadow: 0 0 0 1px rgba(28, 80, 90, 0.95), 0 0 26px rgba(0,255,231,0.28);
+      transform: translateY(-1px);
+    }
+
+    /* ── PADDLE TOUCH STRIPS ──────────────────────────────── */
+    #touch-strip-left, #touch-strip-right {
+      display: none;
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 64px;
+      z-index: 6;
+      pointer-events: auto;
+      touch-action: none;
+    }
+    #touch-strip-left  {
+      left: 0;
+      background: linear-gradient(to right, var(--strip-left-color, rgba(255,234,0,0.06)), transparent);
+      border-left: 2px solid var(--strip-left-border, rgba(255,234,0,0.15));
+    }
+    #touch-strip-right {
+      right: 0;
+      background: linear-gradient(to left, var(--strip-right-color, rgba(255,63,108,0.06)), transparent);
+      border-right: 2px solid var(--strip-right-border, rgba(255,63,108,0.15));
+    }
+
+    .strip-arrow {
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      display: flex; flex-direction: column;
+      align-items: center; gap: 6px;
+      pointer-events: none; user-select: none;
+      font-size: clamp(0.6rem, 2vw, 0.8rem);
+      letter-spacing: .1em;
+      opacity: 0.3;
+    }
+    #touch-strip-left  .strip-arrow { color: var(--strip-left-text, #ffea00);  font-family: 'Orbitron', sans-serif; }
+    #touch-strip-right .strip-arrow { color: var(--strip-right-text, #ff3f6c); font-family: 'Orbitron', sans-serif; }
+
+    /* Mobile restart button — only shown on pause on touch devices */
+    #mobile-restart-btn {
+      display: none;
+      background: none;
+      border: 1px solid #2a4a5a;
+      color: #4a7888;
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(0.68rem, 1vw, 0.82rem);
+      font-weight: 700;
+      letter-spacing: .2em;
+      padding: 10px 22px;
+      cursor: pointer;
+      transition: all .2s;
+      border-radius: 3px;
+    }
+    #mobile-restart-btn:hover, #mobile-restart-btn:active { color: #6a9aaa; border-color: #4a7888; }
 
     #menu-title {
       font-family:'Orbitron', sans-serif;
       font-size: clamp(2rem,6vw,3.8rem);
       font-weight:900;
-      letter-spacing:.4em;
+      letter-spacing:.32em;
       color:var(--glow);
-      text-shadow:0 0 14px var(--glow), 0 0 40px rgba(0,255,231,0.3);
-      margin-bottom:6px;
+      text-shadow:0 0 14px var(--glow), 0 0 48px rgba(0,255,231,0.34);
+      margin-bottom:4px;
       user-select:none;
     }
     #menu-tagline {
       font-size: clamp(0.75rem, 1.2vw, 0.95rem);
-      letter-spacing:.25em;
-      color:#4a7888;
-      margin-bottom:36px;
+      letter-spacing:.2em;
+      color:#5f8b9b;
+      margin-bottom:22px;
     }
 
     .menu-section-label {
@@ -84,16 +267,21 @@
     .stage-card {
       display:flex; flex-direction:column; align-items:center; justify-content:center;
       gap:6px;
-      border:2px solid #1a3040;
-      border-radius:6px;
-      padding:12px 6px;
+      border:1px solid var(--stroke);
+      border-radius:var(--radius-md);
+      padding:12px 8px;
       cursor:pointer;
-      transition:all .2s;
-      background:#050d14;
+      transition:all .2s ease;
+      background:linear-gradient(180deg, rgba(9,21,33,0.92), rgba(5,13,20,0.95));
+      box-shadow: inset 0 1px 0 rgba(130, 180, 200, 0.06);
       user-select:none;
     }
-    .stage-card:hover { border-color:#3a6070; }
-    .stage-card.selected { border-color:var(--glow); box-shadow:0 0 14px rgba(0,255,231,0.2); }
+    .stage-card:hover { border-color:var(--stroke-strong); transform: translateY(-1px); }
+    .stage-card.selected {
+      border-color:var(--glow);
+      box-shadow:0 0 0 1px rgba(0,255,231,0.25), 0 0 18px rgba(0,255,231,0.22);
+      background:linear-gradient(180deg, rgba(10,30,40,0.95), rgba(7,18,26,0.98));
+    }
     .stage-icon {
       width:56px; height:36px;
       border-radius:3px;
@@ -120,17 +308,18 @@
     }
     .player-card {
       flex:1;
-      border:2px solid #1a3040;
-      border-radius:6px;
+      border:1px solid var(--stroke);
+      border-radius:var(--radius-md);
       padding:14px 10px;
       cursor:pointer;
-      transition:all .2s;
-      background:#050d14;
+      transition:all .2s ease;
+      background:linear-gradient(180deg, rgba(9,21,33,0.9), rgba(5,13,20,0.95));
+      box-shadow: inset 0 1px 0 rgba(130, 180, 200, 0.06);
       text-align:center;
       user-select:none;
     }
-    .player-card:hover { border-color:#3a6070; }
-    .player-card.selected { border-color:var(--glow); box-shadow:0 0 14px rgba(0,255,231,0.2); }
+    .player-card:hover { border-color:var(--stroke-strong); transform: translateY(-1px); }
+    .player-card.selected { border-color:var(--glow); box-shadow:0 0 0 1px rgba(0,255,231,0.25), 0 0 18px rgba(0,255,231,0.2); }
     .player-card-icon { font-size:1.4rem; margin-bottom:5px; }
     .player-card-title {
       font-family:'Orbitron',sans-serif;
@@ -153,17 +342,18 @@
     }
     .diff-card {
       flex:1;
-      border:2px solid #1a3040;
-      border-radius:6px;
+      border:1px solid var(--stroke);
+      border-radius:var(--radius-md);
       padding:12px 8px;
       cursor:pointer;
-      transition:all .2s;
-      background:#050d14;
+      transition:all .2s ease;
+      background:linear-gradient(180deg, rgba(9,21,33,0.9), rgba(5,13,20,0.95));
+      box-shadow: inset 0 1px 0 rgba(130, 180, 200, 0.06);
       text-align:center;
       user-select:none;
     }
-    .diff-card:hover { border-color:#3a6070; }
-    .diff-card.selected { box-shadow:0 0 14px rgba(0,255,231,0.15); }
+    .diff-card:hover { border-color:var(--stroke-strong); transform: translateY(-1px); }
+    .diff-card.selected { box-shadow:0 0 0 1px rgba(0,255,231,0.22), 0 0 14px rgba(0,255,231,0.15); }
     .diff-card[data-diff="easy"].selected   { border-color:#00ff88; }
     .diff-card[data-diff="medium"].selected { border-color:#ffea00; }
     .diff-card[data-diff="hard"].selected   { border-color:#ff3f6c; }
@@ -187,17 +377,18 @@
     }
     .mode-card {
       flex:1;
-      border:2px solid #1a3040;
-      border-radius:6px;
+      border:1px solid var(--stroke);
+      border-radius:var(--radius-md);
       padding:14px 10px;
       cursor:pointer;
-      transition:all .2s;
-      background:#050d14;
+      transition:all .2s ease;
+      background:linear-gradient(180deg, rgba(9,21,33,0.9), rgba(5,13,20,0.95));
+      box-shadow: inset 0 1px 0 rgba(130, 180, 200, 0.06);
       text-align:center;
       user-select:none;
     }
-    .mode-card:hover { border-color:#3a6070; }
-    .mode-card.selected { border-color:var(--glow); box-shadow:0 0 14px rgba(0,255,231,0.2); }
+    .mode-card:hover { border-color:var(--stroke-strong); transform: translateY(-1px); }
+    .mode-card.selected { border-color:var(--glow); box-shadow:0 0 0 1px rgba(0,255,231,0.25), 0 0 18px rgba(0,255,231,0.2); }
     .mode-title {
       font-family:'Orbitron',sans-serif;
       font-size: clamp(0.75rem, 1.1vw, 0.95rem);
@@ -242,6 +433,11 @@
       border-radius:3px;
     }
     .btn-secondary:hover { color:#6a9aaa; border-color:#4a7888; }
+    .stage-card:focus-visible, .player-card:focus-visible, .diff-card:focus-visible, .mode-card:focus-visible,
+    #menu-back-btn:focus-visible, #menu-next-btn:focus-visible, .btn-secondary:focus-visible, .btn-primary:focus-visible {
+      outline: 2px solid rgba(0,255,231,0.7);
+      outline-offset: 2px;
+    }
 
     /* ── GAME SCREEN ─────────────────────────────────────── */
     #game-screen { gap:0; }
@@ -260,12 +456,25 @@
       user-select:none;
     }
     #game-mode-label {
-      position:absolute; right:0;
+      position: static;
       font-family:'Orbitron',sans-serif;
       font-size: clamp(0.65rem, 1vw, 0.82rem);
       letter-spacing:.2em;
       color:#3a5a6a;
       user-select:none;
+      text-align: right;
+      line-height: 1.1;
+    }
+    #game-meta-right {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      min-width: 150px;
     }
 
     .score-board {
@@ -354,6 +563,87 @@
     }
     #sound-toggle:hover, #game-sound-toggle:hover { color:#6a9aaa; border-color:#4a7080; }
     #sound-toggle.muted, #game-sound-toggle.muted { color:#1e2e34; border-color:#111e24; text-decoration:line-through; }
+
+    #changelog-btn {
+      background:none; border:1px solid #1a3040; color:#2a4a5a;
+      font-family:'Share Tech Mono',monospace; font-size: clamp(0.58rem, 0.82vw, 0.7rem);
+      letter-spacing:.1em; padding:3px 9px; cursor:pointer;
+      transition:all .2s; border-radius:2px;
+    }
+    #changelog-btn:hover { color:#4a7080; border-color:#2a4050; }
+
+    /* ── CHANGELOG MODAL ─────────────────────────────────── */
+    #changelog-modal {
+      display:none; position:fixed; inset:0; z-index:300;
+      align-items:center; justify-content:center;
+      background:rgba(2,4,8,0.92); backdrop-filter:blur(4px);
+    }
+    #changelog-modal.open { display:flex; }
+    #changelog-panel {
+      background:#070f18; border:1px solid #1a3040; border-radius:6px;
+      padding:0; width:min(580px,96vw); max-height:80vh;
+      box-shadow:0 0 50px rgba(0,255,231,0.05);
+      display:flex; flex-direction:column; overflow:hidden;
+    }
+    #changelog-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 24px 14px;
+      border-bottom:1px solid #0d2030;
+      flex-shrink:0;
+    }
+    #changelog-header h2 {
+      font-family:'Orbitron',sans-serif; font-size: clamp(0.85rem, 1.2vw, 1rem);
+      font-weight:700; color:var(--glow); letter-spacing:.3em;
+      text-shadow:0 0 8px var(--glow);
+    }
+    #changelog-close-btn {
+      background:none; border:1px solid #1a3040; color:#3a6070;
+      font-family:'Share Tech Mono',monospace; font-size:0.75rem;
+      padding:4px 10px; cursor:pointer; border-radius:2px; transition:all .2s;
+    }
+    #changelog-close-btn:hover { color:#6a9aaa; border-color:#3a6070; }
+    #changelog-body {
+      overflow-y:auto; padding:20px 24px;
+      flex:1;
+      -webkit-overflow-scrolling:touch;
+    }
+    #changelog-body::-webkit-scrollbar { width:4px; }
+    #changelog-body::-webkit-scrollbar-track { background:#050d14; }
+    #changelog-body::-webkit-scrollbar-thumb { background:#1a3040; border-radius:2px; }
+    .cl-version {
+      font-family:'Orbitron',sans-serif;
+      font-size: clamp(0.75rem, 1.1vw, 0.9rem);
+      font-weight:700; letter-spacing:.2em;
+      color:var(--glow); text-shadow:0 0 8px var(--glow);
+      margin-bottom:8px; margin-top:22px;
+    }
+    .cl-version:first-child { margin-top:0; }
+    .cl-tag {
+      display:inline-block;
+      font-family:'Share Tech Mono',monospace;
+      font-size:0.6rem; letter-spacing:.1em;
+      color:#2a5060; border:1px solid #1a3040;
+      padding:1px 6px; border-radius:2px; margin-left:8px;
+      vertical-align:middle;
+    }
+    .cl-section {
+      font-family:'Orbitron',sans-serif;
+      font-size:0.6rem; letter-spacing:.2em;
+      color:#3a6070; margin:10px 0 6px;
+      text-transform:uppercase;
+    }
+    .cl-item {
+      font-size: clamp(0.65rem, 0.9vw, 0.78rem);
+      color:#5a8090; letter-spacing:.05em;
+      line-height:1.7; padding-left:14px;
+      position:relative; margin-bottom:3px;
+    }
+    .cl-item::before {
+      content:'—'; position:absolute; left:0; color:#2a4050;
+    }
+    .cl-divider {
+      border:none; border-top:1px solid #0d2030; margin:6px 0;
+    }
 
     /* ── SETTINGS MODAL ──────────────────────────────────── */
     #settings-modal {
@@ -592,6 +882,7 @@
     }
     @media (pointer: coarse) and (orientation: landscape) {
       body { overscroll-behavior: none; }
+      #touch-hints, #touch-hint-right { display: none !important; }
       #game-screen .info {
         display: block;
         margin-top: 6px;
@@ -629,91 +920,115 @@
 ════════════════════════════════════════════════════════════ -->
 <div id="menu-screen" class="screen active">
   <div id="menu-title">NEON PONG</div>
-  <div id="menu-tagline">BETA - VERSION 0.35</div>
+  <div id="menu-tagline">VERSION 0.40</div>
 
-  <!-- Player count select -->
-  <div style="display:flex;flex-direction:column;align-items:flex-start;width:min(600px,94vw);">
-    <div class="menu-section-label">SELECT PLAYERS</div>
-    <div id="player-row" style="width:100%;">
-      <div class="player-card" data-players="1">
-        <div class="player-card-icon">🤖</div>
-        <div class="player-card-title">1 PLAYER</div>
-        <div class="player-card-desc">Play against the AI</div>
-      </div>
-	  <div class="player-card selected" data-players="2">
-        <div class="player-card-icon">👥</div>
-        <div class="player-card-title">2 PLAYERS</div>
-        <div class="player-card-desc">Local co-op. W/S vs ↑/↓</div>
-      </div>
-    </div>
+  <!-- Step progress dots -->
+  <div id="menu-progress">
+    <div class="progress-dot active" id="dot-0"></div>
+    <div class="progress-line" id="line-01"></div>
+    <div class="progress-dot" id="dot-1"></div>
+    <div class="progress-line" id="line-12"></div>
+    <div class="progress-dot" id="dot-2"></div>
   </div>
 
-  <!-- Difficulty select (1P only) -->
-  <div id="difficulty-section" style="display:none;">
-    <div style="display:flex;flex-direction:column;align-items:flex-start;">
-      <div class="menu-section-label">SELECT DIFFICULTY</div>
-      <div id="difficulty-row" style="width:100%;">
-        <div class="diff-card" data-diff="easy">
-          <div class="diff-title">EASY</div>
+  <!-- Pages container -->
+  <div id="menu-pages">
+
+    <!-- ── PAGE 0: Players + Difficulty ── -->
+    <div class="menu-page active" id="page-0">
+      <div class="step-title">STEP 1 — SELECT PLAYERS</div>
+      <div id="player-row" style="width:100%;">
+        <div class="player-card selected" data-players="1">
+          <div class="player-card-icon">🤖</div>
+          <div class="player-card-title">1 PLAYER</div>
+          <div class="player-card-desc">Play against the AI</div>
         </div>
-        <div class="diff-card selected" data-diff="medium">
-          <div class="diff-title">MEDIUM</div>
-        </div>
-        <div class="diff-card" data-diff="hard">
-          <div class="diff-title">HARD</div>
+        <div class="player-card" data-players="2">
+          <div class="player-card-icon">👥</div>
+          <div class="player-card-title">2 PLAYERS</div>
+          <div class="player-card-desc">Local co-op. W/S vs ↑/↓</div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Stage select -->
-  <div style="display:flex;flex-direction:column;align-items:flex-start;width:min(600px,94vw);">
-    <div class="menu-section-label">SELECT STAGE</div>
-    <div id="stage-grid" style="width:100%;">
-      <div class="stage-card selected" data-stage="neon">
-        <div class="stage-icon neon">🌐</div>
-        <div class="stage-name">NEON</div>
-      </div>
-      <div class="stage-card" data-stage="grass">
-        <div class="stage-icon grass">🌿</div>
-        <div class="stage-name">GRASS</div>
-      </div>
-      <div class="stage-card" data-stage="clay">
-        <div class="stage-icon clay">🏺</div>
-        <div class="stage-name">CLAY</div>
-      </div>
-      <div class="stage-card" data-stage="classic">
-        <div class="stage-icon classic">🕹</div>
-        <div class="stage-name">CLASSIC</div>
+      <!-- Difficulty (1P only) -->
+      <div id="difficulty-section" style="display:block; width:100%; margin-top:18px;">
+        <div class="step-title">SELECT DIFFICULTY</div>
+        <div id="difficulty-row" style="width:100%;">
+          <div class="diff-card" data-diff="easy">
+            <div class="diff-title">EASY</div>
+            <div class="diff-desc">Slow reaction.<br>Forgiving AI.</div>
+          </div>
+          <div class="diff-card selected" data-diff="medium">
+            <div class="diff-title">MEDIUM</div>
+            <div class="diff-desc">Predictive AI.<br>Good challenge.</div>
+          </div>
+          <div class="diff-card" data-diff="hard">
+            <div class="diff-title">HARD</div>
+            <div class="diff-desc">Near-perfect.<br>Good luck.</div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Mode select -->
-  <div style="display:flex;flex-direction:column;align-items:flex-start;width:min(600px,94vw);margin-bottom:24px;">
-    <div class="menu-section-label">SELECT MODE</div>
-    <div id="mode-row" style="width:100%;">
-      <div class="mode-card selected" data-mode="normal">
-        <div class="player-card-icon">🏓</div>
-        <div class="mode-title">ARCADE</div>
-        <div class="mode-desc">First to 7 points wins.<br>No sudden death.</div>
-      </div>
-      <div class="mode-card" data-mode="deuce">
-        <div class="player-card-icon">⚡</div>
-        <div class="mode-title">COMPETITIVE</div>
-        <div class="mode-desc">First to 7 with a<br>2-point lead to win.</div>
+    <!-- ── PAGE 1: Stage ── -->
+    <div class="menu-page" id="page-1">
+      <div class="step-title">STEP 2 — SELECT STAGE</div>
+      <div id="stage-grid" style="width:100%;">
+        <div class="stage-card selected" data-stage="neon">
+          <div class="stage-icon neon">🌐</div>
+          <div class="stage-name">NEON</div>
+        </div>
+        <div class="stage-card" data-stage="grass">
+          <div class="stage-icon grass">🌿</div>
+          <div class="stage-name">GRASS</div>
+        </div>
+        <div class="stage-card" data-stage="clay">
+          <div class="stage-icon clay">🏺</div>
+          <div class="stage-name">CLAY</div>
+        </div>
+        <div class="stage-card" data-stage="classic">
+          <div class="stage-icon classic">🕹</div>
+          <div class="stage-name">CLASSIC</div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="menu-btn-row">
-    <button class="btn-primary" id="menu-play-btn">▶ PLAY</button>
-    <button class="btn-secondary" id="menu-settings-btn">⚙ SETTINGS</button>
+    <!-- ── PAGE 2: Mode ── -->
+    <div class="menu-page" id="page-2">
+      <div class="step-title">STEP 3 — SELECT MODE</div>
+      <div id="mode-row" style="width:100%;">
+        <div class="mode-card selected" data-mode="normal">
+          <div class="player-card-icon">🏓</div>
+          <div class="mode-title">ARCADE</div>
+          <div class="mode-desc">First to 7 points wins.<br>No sudden death.</div>
+        </div>
+        <div class="mode-card" data-mode="deuce">
+          <div class="player-card-icon">⚡</div>
+          <div class="mode-title">COMPETITIVE</div>
+          <div class="mode-desc">First to 7 with a<br>2-point lead to win.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end menu-pages -->
+
+  <!-- Nav row: Back | Settings (center) | Next/Play -->
+  <div id="menu-nav">
+    <div id="menu-nav-left">
+      <button id="menu-back-btn" disabled>◀ BACK</button>
+    </div>
+    <div id="menu-nav-center">
+      <button class="btn-secondary" id="menu-settings-btn">⚙ SETTINGS</button>
+    </div>
+    <div id="menu-nav-right">
+      <button id="menu-next-btn">NEXT ▶</button>
+    </div>
   </div>
 
   <div id="footer-bar">
-    <div id="version">Version 0.35 - solidkenn</div>
+    <div id="version">Version 0.40</div>
     <button id="sound-toggle">🔊 SFX ON</button>
+    <button id="changelog-btn">📋 CHANGELOG</button>
   </div>
 </div>
 
@@ -728,13 +1043,23 @@
       <div class="score-sep">:</div>
       <div class="score" id="score-right">0</div>
     </div>
-    <div id="game-mode-label">—</div>
+    <div id="game-meta-right">
+      <div id="game-mode-label">—</div>
+    </div>
   </div>
 
   <div id="canvas-wrap">
     <canvas id="c"></canvas>
 
-    <!-- Touch zone hints (visible on touch devices) -->
+    <!-- Paddle touch strips (kids-friendly, visible on touch devices) -->
+    <div id="touch-strip-left">
+      <div class="strip-arrow" id="strip-arrow-left">▲<br>DRAG<br>▼</div>
+    </div>
+    <div id="touch-strip-right">
+      <div class="strip-arrow" id="strip-arrow-right">▲<br>DRAG<br>▼</div>
+    </div>
+
+    <!-- Touch zone hints (full-court, shown briefly then fade) -->
     <div id="touch-hints">
       <div class="touch-zone-label left">▲<br>DRAG<br>▼</div>
       <div class="touch-zone-label right" id="touch-hint-right">▲<br>DRAG<br>▼</div>
@@ -750,6 +1075,7 @@
       <div id="overlay-sub"></div>
       <div class="overlay-btn-row">
         <button class="btn-primary" id="start-btn">START</button>
+        <button class="btn-secondary" id="restart-btn">↺ RESTART</button>
         <button class="btn-secondary" id="quit-btn">QUIT TO MENU</button>
       </div>
     </div>
@@ -759,12 +1085,93 @@
 
   <div class="info">
     <span>W / S</span> — LEFT PADDLE &nbsp;|&nbsp; <span>↑ / ↓</span> — RIGHT PADDLE<br>
-    PRESS <span>P / ESC</span> TO PAUSE &nbsp;|&nbsp; PRESS <span>R</span> TO RESTART
+    PRESS <span>P / ESC</span> TO PAUSE
   </div>
 
   <div id="game-footer-bar">
-    <div id="game-version">Version 0.35 - solidkenn</div>
+    <div id="game-version">Version 0.40</div>
     <button id="game-sound-toggle">🔊 SFX ON</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     CHANGELOG MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="changelog-modal">
+  <div id="changelog-panel">
+    <div id="changelog-header">
+      <h2>📋 CHANGELOG</h2>
+      <button id="changelog-close-btn">CLOSE</button>
+    </div>
+    <div id="changelog-body">
+
+      <div class="cl-version">VERSION X <span class="cl-tag">ORIGIN</span></div>
+      <div class="cl-item">Made a functioning Pong game</div>
+      <hr class="cl-divider">
+
+      <div class="cl-version">VERSION 0.10</div>
+      <div class="cl-section">Fixes &amp; Changes</div>
+      <div class="cl-item">Fixed the scoring bug — score was jumping to 7 instantly</div>
+      <div class="cl-item">Dynamic ball color — ball color changes when a paddle hits it</div>
+      <hr class="cl-divider">
+
+      <div class="cl-version">VERSION 0.11</div>
+      <div class="cl-section">Fixes &amp; Changes</div>
+      <div class="cl-item">Renamed the game to <em>Neon Pong</em></div>
+      <div class="cl-item">Changed Player 1 paddle to yellow for visibility; applies to dynamic ball color effect</div>
+      <div class="cl-item">Enhanced ball speed and collision during rallies</div>
+      <div class="cl-item">Fixed Enter key bug — after starting, Enter was accidentally restarting the game</div>
+      <div class="cl-item">Added Escape key as a Pause key</div>
+      <div class="cl-item">Added Deuce feature — 2-point lead required to win; advantage banner shows who leads</div>
+      <hr class="cl-divider">
+
+      <div class="cl-version">VERSION 0.12</div>
+      <div class="cl-section">New Features</div>
+      <div class="cl-item">Settings menu added in the start overlay, accessible any time from the Pause Menu</div>
+      <div class="cl-item">Paddle color customization — color wheel picker per player, live preview on canvas</div>
+      <div class="cl-item">Ball speed controls — three sliders: Hits Before Ramp, Ramp Rate Per Hit, Top Speed Cap</div>
+      <div class="cl-item">Sound effects via Web Audio API — Paddle Hit, Wall Bounce, Score, Deuce, Advantage, Win, Pause</div>
+      <div class="cl-item">Sound effects toggle button in the footer to mute/unmute at any time</div>
+      <div class="cl-item">Version label added to footer</div>
+      <hr class="cl-divider">
+
+      <div class="cl-version">VERSION 0.20 <span class="cl-tag">BETA</span></div>
+      <div class="cl-section">Visual &amp; Gameplay Changes</div>
+      <div class="cl-item">4 playable stages: Neon, Grass, Clay, Classic — each with unique court design and ball rendering</div>
+      <div class="cl-item">Two game modes: Arcade (first to 7) and Competitive (2-point lead rule)</div>
+      <div class="cl-item">Main Menu with stage, mode, and settings selection before each match</div>
+      <div class="cl-item">Paddle color customization disabled on Grass, Clay, and Classic stages</div>
+      <div class="cl-item">Settings removed from Pause Menu — now only accessible from Main Menu</div>
+      <div class="cl-item">Quit to Menu button added to Pause overlay</div>
+      <div class="cl-item">Ball highlight added in Neon stage — white specular glow keeps dark-colored balls visible</div>
+      <hr class="cl-divider">
+
+      <div class="cl-version">VERSION 0.30 <span class="cl-tag">PUBLIC BETA</span></div>
+      <div class="cl-section">Changes</div>
+      <div class="cl-item">UI polished on desktop view — readability improvements across all text</div>
+      <div class="cl-item">1 Player Mode added with AI opponent</div>
+      <div class="cl-item">Difficulty selector: Easy, Medium, Hard — each with tuned AI behavior</div>
+      <div class="cl-item">Modified default ball speed ramp values</div>
+      <hr class="cl-divider">
+
+      <div class="cl-version">VERSION 0.35 <span class="cl-tag">MOBILE</span></div>
+      <div class="cl-section">Changes</div>
+      <div class="cl-item">Added mobile compatibility for tablets and phones</div>
+      <div class="cl-item">Touch drag zones for paddle control — left zone for P1, right zone for P2</div>
+      <div class="cl-item">Portrait lock screen prompts device rotation</div>
+      <div class="cl-item">On-screen Pause button for touch devices</div>
+      <div class="cl-item">Paddle touch strips added as a kids-friendly narrow control zone</div>
+      <div class="cl-item">AI rebalanced for Medium and Hard difficulty</div>
+      <hr class="cl-divider">
+
+      <div class="cl-version">VERSION 0.40 <span class="cl-tag">D-PAD SUPPORT</span></div>
+      <div class="cl-section">Changes</div>
+      <div class="cl-item">UI Polishing in both Desktop and Mobile View</div>
+      <div class="cl-item">Fix the Tail Ball issue in Classic Stage</div>
+      <div class="cl-item">Added controller and D-pad support for gameplay controls</div>
+      <div class="cl-item">Added controller navigation in Main Menu and Pause screen</div>
+
+    </div>
   </div>
 </div>
 
@@ -800,13 +1207,13 @@
       <div class="settings-section-title">Ball Speed Ramp</div>
       <div class="speed-row">
         <label>Hits before ramp</label>
-        <input type="range" id="ramp-after" min="1" max="20" value="4" step="1">
-        <span class="speed-val" id="ramp-after-val">4</span>
+        <input type="range" id="ramp-after" min="1" max="20" value="3" step="1">
+        <span class="speed-val" id="ramp-after-val">3</span>
       </div>
       <div class="speed-row">
         <label>Ramp rate per hit</label>
-        <input type="range" id="ramp-rate" min="1.00" max="1.15" value="1.05" step="0.01">
-        <span class="speed-val" id="ramp-rate-val">1.05×</span>
+        <input type="range" id="ramp-rate" min="1.00" max="1.15" value="1.07" step="0.01">
+        <span class="speed-val" id="ramp-rate-val">1.07×</span>
       </div>
       <div class="speed-row">
         <label>Top speed cap</label>
@@ -840,6 +1247,14 @@ let audioCtx = null;
 let soundEnabled = true;
 
 function getAudio() { if (!audioCtx) audioCtx = new AudioCtx(); return audioCtx; }
+function unlockAudio() {
+  try {
+    const ac = getAudio();
+    if (ac.state === 'suspended') {
+      ac.resume();
+    }
+  } catch(e) {}
+}
 
 function playTone({ freq=440, type='square', vol=0.18, duration=0.08, freqEnd=null, delay=0 }={}) {
   if (!soundEnabled) return;
@@ -1041,15 +1456,15 @@ const ctx    = canvas.getContext('2d');
 
 let currentStage = 'neon';
 let currentMode  = 'normal'; // 'normal' | 'deuce'
-let playerCount  = 2;        // 1 | 2
+let playerCount  = 1;        // 1 | 2
 let aiDifficulty = 'medium'; // 'easy' | 'medium' | 'hard'
 const WIN_SCORE  = 7;
 
 let COL_LEFT  = '#ffea00';
 let COL_RIGHT = '#ff3f6c';
 
-let SPEED_RAMP_AFTER = 4;
-let SPEED_RAMP_RATE  = 1.05;
+let SPEED_RAMP_AFTER = 3;
+let SPEED_RAMP_RATE  = 1.07;
 let SPEED_MAX_MULT   = 0.025;
 
 let running=false, paused=false, gameOver=false, betweenPoints=false;
@@ -1058,6 +1473,10 @@ let lPaddle, rPaddle, ball;
 let flashTimer=0, flashSide=null;
 let particles=[];
 let rallyHits=0;
+let prevPauseBtn=false, prevRestartBtn=false;
+let prevUiLeft=false, prevUiRight=false, prevUiUp=false, prevUiDown=false, prevUiConfirm=false, prevUiCancel=false;
+let latestGamepadInputs = { leftInput: 0, rightInput: 0 };
+let menuCardRow = 0; // Step 0: 0=players, 1=difficulty
 
 const keys={};
 function isTypingTarget(el) {
@@ -1080,6 +1499,177 @@ window.addEventListener('keydown', e => {
 });
 
 function getTheme() { return THEMES[currentStage]; }
+
+function axisWithDeadzone(v, dz=0.22) {
+  if (Math.abs(v) < dz) return 0;
+  return v;
+}
+
+function readStickOrDpad(gp, axisIndex) {
+  if (!gp) return 0;
+  const axis = axisWithDeadzone((gp.axes && gp.axes.length > axisIndex) ? gp.axes[axisIndex] : 0);
+  const up = gp.buttons && gp.buttons[12] && gp.buttons[12].pressed ? -1 : 0;
+  const down = gp.buttons && gp.buttons[13] && gp.buttons[13].pressed ? 1 : 0;
+  const dpad = up + down;
+  return dpad !== 0 ? dpad : axis;
+}
+
+function updateGamepadState() {
+  const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+  const gp0 = pads && pads[0] ? pads[0] : null;
+  const gp1 = pads && pads[1] ? pads[1] : null;
+  const leftInput = readStickOrDpad(gp0, 1);
+  let rightInput = 0;
+  if (playerCount === 2) {
+    // 2P gamepad mapping:
+    // - Two controllers: P1 = controller 1 left stick/D-pad, P2 = controller 2 left stick/D-pad
+    // - One controller fallback: P2 = right stick
+    rightInput = gp1 ? readStickOrDpad(gp1, 1) : readStickOrDpad(gp0, 3);
+  }
+
+  const pauseBtn = !!(gp0 && gp0.buttons && gp0.buttons[9] && gp0.buttons[9].pressed);   // START
+  const restartBtn = !!(gp0 && gp0.buttons && gp0.buttons[0] && gp0.buttons[0].pressed); // A / Cross
+
+  if (pauseBtn && !prevPauseBtn) togglePause();
+  if (restartBtn && !prevRestartBtn) restartPoint();
+  prevPauseBtn = pauseBtn;
+  prevRestartBtn = restartBtn;
+
+  return { leftInput, rightInput };
+}
+
+function getPrimaryGamepad() {
+  const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+  if (!pads) return null;
+  for (const gp of pads) {
+    if (gp && gp.connected) return gp;
+  }
+  return null;
+}
+
+function isElementVisible(el) {
+  return !!(el && el.offsetParent !== null);
+}
+
+function clickIfEnabled(el) {
+  if (!el || el.disabled || !isElementVisible(el)) return;
+  unlockAudio();
+  el.click();
+}
+
+function cycleFocus(targets, dir) {
+  if (!targets.length) return;
+  const active = document.activeElement;
+  let idx = targets.indexOf(active);
+  if (idx < 0) idx = dir > 0 ? -1 : 0;
+  idx = (idx + dir + targets.length) % targets.length;
+  targets[idx].focus();
+}
+
+function handleGamepadUI() {
+  const gp = getPrimaryGamepad();
+  if (!gp) {
+    prevUiLeft = prevUiRight = prevUiUp = prevUiDown = prevUiConfirm = prevUiCancel = false;
+    return;
+  }
+
+  const axisX = axisWithDeadzone((gp.axes && gp.axes.length > 0) ? gp.axes[0] : 0, 0.45);
+  const axisY = axisWithDeadzone((gp.axes && gp.axes.length > 1) ? gp.axes[1] : 0, 0.45);
+  const left = (gp.buttons[14] && gp.buttons[14].pressed) || axisX < -0.5;
+  const right = (gp.buttons[15] && gp.buttons[15].pressed) || axisX > 0.5;
+  const up = (gp.buttons[12] && gp.buttons[12].pressed) || axisY < -0.5;
+  const down = (gp.buttons[13] && gp.buttons[13].pressed) || axisY > 0.5;
+  const confirm = gp.buttons[0] && gp.buttons[0].pressed; // A / Cross
+  const cancel = gp.buttons[1] && gp.buttons[1].pressed;  // B / Circle
+
+  const menuActive = document.getElementById('menu-screen').classList.contains('active');
+  const gameActive = document.getElementById('game-screen').classList.contains('active');
+  const settingsOpen = document.getElementById('settings-modal').classList.contains('open');
+  const changelogOpen = document.getElementById('changelog-modal').classList.contains('open');
+
+  if (menuActive && !settingsOpen && !changelogOpen) {
+    const selectCardByDelta = (selector, delta) => {
+      const cards = Array.from(document.querySelectorAll(selector));
+      if (!cards.length) return;
+      let idx = cards.findIndex(c => c.classList.contains('selected'));
+      if (idx < 0) idx = 0;
+      idx = (idx + delta + cards.length) % cards.length;
+      cards[idx].click();
+      cards[idx].focus();
+    };
+
+    // Direct card selection on each setup step.
+    if (menuStep === 0) {
+      // Difficulty row (only when visible in 1P): up/down toggles active row.
+      const difficultyVisible = document.getElementById('difficulty-section').style.display !== 'none';
+      if (difficultyVisible && (up && !prevUiUp || down && !prevUiDown)) {
+        menuCardRow = menuCardRow === 0 ? 1 : 0;
+      }
+      if (!difficultyVisible) menuCardRow = 0;
+
+      if (menuCardRow === 0) {
+        if (left && !prevUiLeft) selectCardByDelta('.player-card', -1);
+        if (right && !prevUiRight) selectCardByDelta('.player-card', 1);
+      } else {
+        if (left && !prevUiLeft) selectCardByDelta('.diff-card', -1);
+        if (right && !prevUiRight) selectCardByDelta('.diff-card', 1);
+      }
+    } else if (menuStep === 1) {
+      menuCardRow = 0;
+      if (left && !prevUiLeft) selectCardByDelta('.stage-card', -1);
+      if (right && !prevUiRight) selectCardByDelta('.stage-card', 1);
+    } else if (menuStep === 2) {
+      menuCardRow = 0;
+      if (left && !prevUiLeft) selectCardByDelta('.mode-card', -1);
+      if (right && !prevUiRight) selectCardByDelta('.mode-card', 1);
+    }
+
+    const targets = [
+      document.getElementById('menu-back-btn'),
+      document.getElementById('menu-settings-btn'),
+      document.getElementById('menu-next-btn')
+    ].filter(el => isElementVisible(el) && !el.disabled);
+
+    // Keep menu navigation simple:
+    // - D-pad/stick only changes setup cards
+    // - A confirms by advancing (NEXT/PLAY)
+    // - B goes back
+    if (confirm && !prevUiConfirm) {
+      clickIfEnabled(document.getElementById('menu-next-btn'));
+    }
+    if (cancel && !prevUiCancel) clickIfEnabled(document.getElementById('menu-back-btn'));
+  }
+
+  if (gameActive) {
+    const overlay = document.getElementById('overlay');
+    const overlayVisible = !overlay.classList.contains('hidden');
+    if (overlayVisible) {
+      const targets = [
+        document.getElementById('start-btn'),
+        document.getElementById('restart-btn'),
+        document.getElementById('quit-btn')
+      ].filter(isElementVisible);
+
+      if (left && !prevUiLeft) cycleFocus(targets, -1);
+      if (right && !prevUiRight) cycleFocus(targets, 1);
+      if (confirm && !prevUiConfirm) {
+        const active = document.activeElement;
+        clickIfEnabled(targets.includes(active) ? active : document.getElementById('start-btn'));
+      }
+      if (cancel && !prevUiCancel && paused && !gameOver) clickIfEnabled(document.getElementById('start-btn'));
+    }
+  }
+
+  if (settingsOpen && cancel && !prevUiCancel) clickIfEnabled(document.getElementById('settings-close'));
+  if (changelogOpen && cancel && !prevUiCancel) clickIfEnabled(document.getElementById('changelog-close-btn'));
+
+  prevUiLeft = !!left;
+  prevUiRight = !!right;
+  prevUiUp = !!up;
+  prevUiDown = !!down;
+  prevUiConfirm = !!confirm;
+  prevUiCancel = !!cancel;
+}
 
 function getPaddleColors() {
   const t = getTheme();
@@ -1225,6 +1815,8 @@ function updateAI(dt, H) {
 let lastTime=0;
 function loop(ts) {
   const dt=Math.min((ts-lastTime)/16.67,3); lastTime=ts;
+  latestGamepadInputs = updateGamepadState();
+  handleGamepadUI();
   if(running&&!paused&&!gameOver) update(dt);
   draw();
   requestAnimationFrame(loop);
@@ -1234,9 +1826,12 @@ function update(dt) {
   const W=canvas.width, H=canvas.height;
   const pspd=canvas.height*0.012*dt;
   const cols=getPaddleColors();
+  const gp = latestGamepadInputs;
 
   if(keys['w']||keys['W']) lPaddle.y-=pspd;
   if(keys['s']||keys['S']) lPaddle.y+=pspd;
+  if(gp.leftInput<0) lPaddle.y-=pspd*Math.abs(gp.leftInput);
+  if(gp.leftInput>0) lPaddle.y+=pspd*Math.abs(gp.leftInput);
   lPaddle.y=Math.max(0,Math.min(H-lPaddle.h,lPaddle.y));
 
   if(playerCount===1) {
@@ -1244,6 +1839,8 @@ function update(dt) {
   } else {
     if(keys['ArrowUp'])   rPaddle.y-=pspd;
     if(keys['ArrowDown']) rPaddle.y+=pspd;
+    if(gp.rightInput<0) rPaddle.y-=pspd*Math.abs(gp.rightInput);
+    if(gp.rightInput>0) rPaddle.y+=pspd*Math.abs(gp.rightInput);
     rPaddle.y=Math.max(0,Math.min(H-rPaddle.h,rPaddle.y));
   }
 
@@ -1335,6 +1932,7 @@ function showWin(side) {
   badge.style.color=col; badge.style.border=`1px solid ${col}`;
   badge.style.display='block';
   startBtn.textContent='PLAY AGAIN';
+  document.getElementById('restart-btn').style.display = 'none';
   overlay.classList.remove('hidden');
 }
 
@@ -1348,16 +1946,18 @@ function togglePause() {
   if(!running||gameOver) return;
   paused=!paused;
   SFX.pause();
-  const overlay=document.getElementById('overlay');
-  const title=document.getElementById('overlay-title');
-  const sub=document.getElementById('overlay-sub');
-  const badge=document.getElementById('winner-badge');
-  const startBtn=document.getElementById('start-btn');
-  title.textContent='PAUSED';
-  sub.textContent='PRESS P OR ESC TO RESUME';
-  badge.style.display='none';
-  startBtn.textContent='RESUME';
-  overlay.classList.toggle('hidden',!paused);
+  const overlay   = document.getElementById('overlay');
+  const title     = document.getElementById('overlay-title');
+  const sub       = document.getElementById('overlay-sub');
+  const badge     = document.getElementById('winner-badge');
+  const startBtn  = document.getElementById('start-btn');
+  const restartBtn= document.getElementById('restart-btn');
+  title.textContent = 'PAUSED';
+  sub.textContent   = 'PRESS P OR ESC TO RESUME';
+  badge.style.display  = 'none';
+  startBtn.textContent = 'RESUME';
+  restartBtn.style.display = paused ? '' : 'none'; // show on pause, hide on resume
+  overlay.classList.toggle('hidden', !paused);
 }
 
 function quitToMenu() {
@@ -1367,7 +1967,9 @@ function quitToMenu() {
   document.getElementById('overlay-sub').textContent='';
   document.getElementById('winner-badge').style.display='none';
   document.getElementById('start-btn').textContent='START';
+  document.getElementById('restart-btn').style.display='none';
   document.getElementById('status-bar').style.opacity='0';
+  resetMenuToStep0();
   showScreen('menu-screen');
 }
 
@@ -1405,11 +2007,11 @@ function draw() {
 
   if(!running) return;
 
-  // Ball trail
-  if(ball.trail.length>1){
+  // Ball trail (disabled on classic stage for authentic retro look)
+  if(currentStage!=='classic' && ball.trail.length>1){
     for(let i=0;i<ball.trail.length;i++){
       const t=ball.trail[i];
-      const a=(i/ball.trail.length)*(currentStage==='classic'?0.5:0.35);
+      const a=(i/ball.trail.length)*0.35;
       ctx.globalAlpha=a;
       ctx.fillStyle=ball.color;
       ctx.beginPath(); ctx.arc(t.x,t.y,ball.r*(i/ball.trail.length),0,Math.PI*2); ctx.fill();
@@ -1428,88 +2030,152 @@ function draw() {
   ctx.shadowBlur=0;
 }
 
-// ─── Main Menu wiring ─────────────────────────────────────────────────────────
+// ─── Paginated Menu ───────────────────────────────────────────────────────────
+let menuStep = 0;
+const TOTAL_STEPS = 3;
+
+function goToStep(step) {
+  // Hide all pages
+  document.querySelectorAll('.menu-page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${step}`).classList.add('active');
+
+  // Update progress dots
+  for (let i = 0; i < TOTAL_STEPS; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    dot.classList.remove('active','done');
+    if (i < step)  dot.classList.add('done');
+    if (i === step) dot.classList.add('active');
+  }
+  for (let i = 0; i < TOTAL_STEPS - 1; i++) {
+    const line = document.getElementById(`line-${i}${i+1}`);
+    line.classList.toggle('done', i < step);
+  }
+
+  // Back button
+  document.getElementById('menu-back-btn').disabled = (step === 0);
+
+  // Next button label
+  const nextBtn = document.getElementById('menu-next-btn');
+  nextBtn.textContent = step === TOTAL_STEPS - 1 ? '▶ PLAY' : 'NEXT ▶';
+
+  menuStep = step;
+}
+
+document.getElementById('menu-next-btn').addEventListener('click', () => {
+  unlockAudio();
+  if (menuStep < TOTAL_STEPS - 1) {
+    goToStep(menuStep + 1);
+  } else {
+    // Last step — start game
+    startGame();
+  }
+  document.getElementById('menu-next-btn').blur();
+});
+
+document.getElementById('menu-back-btn').addEventListener('click', () => {
+  unlockAudio();
+  if (menuStep > 0) goToStep(menuStep - 1);
+  document.getElementById('menu-back-btn').blur();
+});
+
+window.addEventListener('gamepadconnected', () => {
+  const infoEl = document.querySelector('#game-screen .info');
+  if (infoEl && !isTouchDevice()) {
+    infoEl.innerHTML = '<span>W / S</span> — LEFT PADDLE &nbsp;|&nbsp; <span>↑ / ↓</span> — RIGHT PADDLE<br><span>GAMEPAD</span> — STICK / D-PAD &nbsp;|&nbsp; START: PAUSE &nbsp;|&nbsp; A: RESTART';
+  }
+});
+
+// Reset menu to step 0 when returning from game
+function resetMenuToStep0() {
+  goToStep(0);
+}
+
+function startGame() {
+  showScreen('game-screen');
+  document.getElementById('game-stage-label').textContent = currentStage.toUpperCase();
+  const modeLabel  = currentMode==='deuce' ? 'COMPETITIVE' : 'ARCADE';
+  const playerLabel = playerCount===1 ? `1P · ${aiDifficulty.toUpperCase()}` : '2P';
+  document.getElementById('game-mode-label').textContent = `${playerLabel} · ${modeLabel}`;
+  document.getElementById('canvas-wrap').style.borderColor = getTheme().borderColor;
+  const infoEl = document.querySelector('#game-screen .info');
+  if (playerCount===1) {
+    infoEl.innerHTML = '<span>W / S</span> — YOUR PADDLE &nbsp;|&nbsp; AI controls right paddle<br>PRESS <span>P / ESC</span> TO PAUSE';
+  } else {
+    infoEl.innerHTML = '<span>W / S</span> — LEFT PADDLE &nbsp;|&nbsp; <span>↑ / ↓</span> — RIGHT PADDLE<br>PRESS <span>P / ESC</span> TO PAUSE';
+  }
+  aiTargetY = canvas.height / 2;
+  aiReactionTimer = 0;
+  aiErrorOffset = 0;
+  updateTouchHints();
+  updateStripColors();
+  fullReset();
+  running = true;
+  resize();
+  document.getElementById('overlay').classList.add('hidden');
+}
+
 // Player count cards
 document.querySelectorAll('.player-card').forEach(card => {
   card.addEventListener('click', () => {
-    document.querySelectorAll('.player-card').forEach(c=>c.classList.remove('selected'));
+    document.querySelectorAll('.player-card').forEach(c => c.classList.remove('selected'));
     card.classList.add('selected');
     playerCount = parseInt(card.dataset.players);
-    // Show/hide difficulty selector
-    document.getElementById('difficulty-section').style.display =
-      playerCount === 1 ? 'block' : 'none';
+    document.getElementById('difficulty-section').style.display = playerCount === 1 ? 'block' : 'none';
   });
 });
 
 // Difficulty cards
 document.querySelectorAll('.diff-card').forEach(card => {
   card.addEventListener('click', () => {
-    document.querySelectorAll('.diff-card').forEach(c=>c.classList.remove('selected'));
+    document.querySelectorAll('.diff-card').forEach(c => c.classList.remove('selected'));
     card.classList.add('selected');
     aiDifficulty = card.dataset.diff;
   });
 });
+
+// Stage cards
 document.querySelectorAll('.stage-card').forEach(card => {
   card.addEventListener('click', () => {
-    document.querySelectorAll('.stage-card').forEach(c=>c.classList.remove('selected'));
+    document.querySelectorAll('.stage-card').forEach(c => c.classList.remove('selected'));
     card.classList.add('selected');
-    currentStage=card.dataset.stage;
+    currentStage = card.dataset.stage;
     updateSettingsColorAccess();
-    // live preview
-    canvas.style.background=getTheme().canvasBg;
-    if(running) resetBall();
+    canvas.style.background = getTheme().canvasBg;
+    if (running) resetBall();
   });
 });
 
+// Mode cards
 document.querySelectorAll('.mode-card').forEach(card => {
   card.addEventListener('click', () => {
-    document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
+    document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
     card.classList.add('selected');
-    currentMode=card.dataset.mode;
+    currentMode = card.dataset.mode;
   });
-});
-
-document.getElementById('menu-play-btn').addEventListener('click', () => {
-  showScreen('game-screen');
-  // Update header labels
-  document.getElementById('game-stage-label').textContent = currentStage.toUpperCase();
-  const modeLabel = currentMode==='deuce' ? 'COMPETITIVE' : 'ARCADE';
-  const playerLabel = playerCount===1 ? `1P · ${aiDifficulty.toUpperCase()}` : '2P';
-  document.getElementById('game-mode-label').textContent = `${playerLabel} · ${modeLabel}`;
-  // Update canvas border
-  document.getElementById('canvas-wrap').style.borderColor=getTheme().borderColor;
-  // Update info bar controls hint
-  const infoEl = document.querySelector('#game-screen .info');
-  if(playerCount===1) {
-    infoEl.innerHTML = '<span>W / S</span> — YOUR PADDLE &nbsp;|&nbsp; AI controls right paddle<br>PRESS <span>P / ESC</span> TO PAUSE &nbsp;|&nbsp; PRESS <span>R</span> TO RESTART';
-  } else {
-    infoEl.innerHTML = '<span>W / S</span> — LEFT PADDLE &nbsp;|&nbsp; <span>↑ / ↓</span> — RIGHT PADDLE<br>PRESS <span>P / ESC</span> TO PAUSE &nbsp;|&nbsp; PRESS <span>R</span> TO RESTART';
-  }
-  // Reset AI state
-  aiTargetY = canvas.height / 2;
-  aiReactionTimer = 0;
-  aiErrorOffset = 0;
-  // Update touch hints for 1P vs 2P
-  updateTouchHints();
-  // Reset & start
-  fullReset();
-  running=true;
-  resize();
-  document.getElementById('overlay').classList.add('hidden');
-  document.getElementById('menu-play-btn').blur();
 });
 
 // ─── In-game overlay buttons ──────────────────────────────────────────────────
 document.getElementById('start-btn').addEventListener('click', () => {
-  const startBtn=document.getElementById('start-btn');
-  const overlay=document.getElementById('overlay');
-  if(paused){ paused=false; }
-  else { fullReset(); running=true; }
+  unlockAudio();
+  const startBtn = document.getElementById('start-btn');
+  const overlay  = document.getElementById('overlay');
+  if (paused) { paused = false; }
+  else { fullReset(); running = true; }
+  document.getElementById('restart-btn').style.display = 'none';
   overlay.classList.add('hidden');
   startBtn.blur();
 });
 
+document.getElementById('restart-btn').addEventListener('click', () => {
+  unlockAudio();
+  fullReset();
+  running = true;
+  document.getElementById('overlay').classList.add('hidden');
+  document.getElementById('restart-btn').blur();
+});
+
 document.getElementById('quit-btn').addEventListener('click', () => {
+  unlockAudio();
   quitToMenu();
   document.getElementById('quit-btn').blur();
 });
@@ -1524,9 +2190,11 @@ function syncSoundButtons() {
 }
 
 document.getElementById('sound-toggle').addEventListener('click', function() {
+  unlockAudio();
   soundEnabled = !soundEnabled; syncSoundButtons(); this.blur();
 });
 document.getElementById('game-sound-toggle').addEventListener('click', function() {
+  unlockAudio();
   soundEnabled = !soundEnabled; syncSoundButtons(); this.blur();
 });
 
@@ -1540,7 +2208,20 @@ document.getElementById('menu-settings-btn').addEventListener('click',()=>{ open
 settingsModal.addEventListener('click',e=>{ if(e.target===settingsModal) closeSettings(); });
 document.getElementById('settings-close').addEventListener('click',()=>{ closeSettings(); document.getElementById('settings-close').blur(); });
 
-const DEFAULTS={ p1:'#ffea00', p2:'#ff3f6c', rampAfter:4, rampRate:1.05, rampCap:0.025 };
+// ─── Changelog modal ──────────────────────────────────────────────────────────
+const changelogModal = document.getElementById('changelog-modal');
+document.getElementById('changelog-btn').addEventListener('click', () => {
+  changelogModal.classList.add('open');
+  document.getElementById('changelog-btn').blur();
+});
+document.getElementById('changelog-close-btn').addEventListener('click', () => {
+  changelogModal.classList.remove('open');
+});
+changelogModal.addEventListener('click', e => {
+  if (e.target === changelogModal) changelogModal.classList.remove('open');
+});
+
+const DEFAULTS={ p1:'#ffea00', p2:'#ff3f6c', rampAfter:3, rampRate:1.07, rampCap:0.025 };
 
 function isValidHex(h){ return /^#[0-9a-fA-F]{6}$/.test(h); }
 
@@ -1596,9 +2277,9 @@ document.getElementById('ramp-cap').addEventListener('input',syncSpeedUI);
 
 document.getElementById('settings-reset').addEventListener('click',()=>{
   COL_LEFT=DEFAULTS.p1; COL_RIGHT=DEFAULTS.p2;
-  document.getElementById('ramp-after').value=DEFAULTS.rampAfter;
-  document.getElementById('ramp-rate').value=DEFAULTS.rampRate;
-  document.getElementById('ramp-cap').value=DEFAULTS.rampCap;
+  SPEED_RAMP_AFTER=DEFAULTS.rampAfter;
+  SPEED_RAMP_RATE=DEFAULTS.rampRate;
+  SPEED_MAX_MULT=DEFAULTS.rampCap;
   syncSettingsUI();
   document.getElementById('settings-reset').blur();
 });
@@ -1628,44 +2309,74 @@ checkOrientation();
 
 // Show mobile UI elements when on touch device
 if (isTouchDevice()) {
-  document.getElementById('touch-hints').style.display = 'block';
+  // Use strip hints only on mobile to avoid duplicate arrow guides.
+  document.getElementById('touch-hints').style.display = 'none';
+  document.getElementById('touch-hint-right').style.display = 'none';
   document.getElementById('mobile-pause-btn').style.display = 'block';
+  document.getElementById('touch-strip-left').style.display  = 'block';
+  document.getElementById('touch-strip-right').style.display = 'block';
   const infoEl = document.querySelector('#game-screen .info');
-  infoEl.innerHTML = '<span>DRAG LEFT SIDE</span> — LEFT PADDLE &nbsp;|&nbsp; <span>DRAG RIGHT SIDE</span> — RIGHT PADDLE (2P)<br>TAP <span>PAUSE</span> BUTTON OR PRESS <span>P / ESC</span> TO PAUSE';
+  infoEl.innerHTML = '<span>DRAG LEFT STRIP</span> — LEFT PADDLE &nbsp;|&nbsp; <span>DRAG RIGHT STRIP</span> — RIGHT PADDLE (2P)<br>TAP <span>PAUSE</span> BUTTON OR PRESS <span>P / ESC</span> TO PAUSE';
 }
 
 // Mobile pause button
 document.getElementById('mobile-pause-btn').addEventListener('click', () => {
+  unlockAudio();
   togglePause();
   document.getElementById('mobile-pause-btn').blur();
 });
 
-// Update right touch hint based on player mode
+window.addEventListener('pointerdown', unlockAudio, { passive: true });
+window.addEventListener('keydown', unlockAudio, { passive: true });
+
+// Update right touch hint and strip based on player mode
 function updateTouchHints() {
-  const rightHint = document.getElementById('touch-hint-right');
+  const rightHint  = document.getElementById('touch-hint-right');
+  const rightStrip = document.getElementById('touch-strip-right');
   if (playerCount === 1) {
-    rightHint.style.opacity = '0'; // AI controls right — no hint needed
+    rightHint.style.opacity  = '0';
+    rightStrip.style.opacity = '0';
   } else {
-    rightHint.style.opacity = ''; // reset to CSS value
+    rightHint.style.opacity  = '';
+    rightStrip.style.opacity = '';
   }
 }
 
+// Update touch strip colors dynamically to match current paddle colors
+function updateStripColors() {
+  const cols = getPaddleColors();
+  const stripL = document.getElementById('touch-strip-left');
+  const stripR = document.getElementById('touch-strip-right');
+  const arrowL = document.getElementById('strip-arrow-left');
+  const arrowR = document.getElementById('strip-arrow-right');
+
+  if (stripL) {
+    stripL.style.background   = `linear-gradient(to right, ${cols.left}18, transparent)`;
+    stripL.style.borderLeft   = `2px solid ${cols.left}44`;
+  }
+  if (stripR) {
+    stripR.style.background   = `linear-gradient(to left, ${cols.right}18, transparent)`;
+    stripR.style.borderRight  = `2px solid ${cols.right}44`;
+  }
+  if (arrowL) arrowL.style.color = cols.left;
+  if (arrowR) arrowR.style.color = cols.right;
+}
+
 // ─── Touch paddle controls ────────────────────────────────────────────────────
-// Track active touches per zone — supports two-finger simultaneous play
 const touchState = { left: null, right: null };
 
 function getTouchZone(clientX) {
   const rect = canvas.getBoundingClientRect();
-  const relX = clientX - rect.left;
+  const relX  = clientX - rect.left;
   return relX < rect.width / 2 ? 'left' : 'right';
 }
 
 function getTouchY(clientY) {
   const rect = canvas.getBoundingClientRect();
-  // Scale touch Y from screen coords to canvas coords
   return (clientY - rect.top) * (canvas.height / rect.height);
 }
 
+// Register touch on canvas (full-court fallback)
 canvas.addEventListener('touchstart', e => {
   e.preventDefault();
   for (const t of e.changedTouches) {
@@ -1690,26 +2401,42 @@ canvas.addEventListener('touchend', e => {
     if (touchState.right && touchState.right.id === t.identifier) touchState.right = null;
   }
 });
+canvas.addEventListener('touchcancel', () => { touchState.left = null; touchState.right = null; });
 
-canvas.addEventListener('touchcancel', () => {
-  touchState.left = null; touchState.right = null;
-});
+// Register touch on paddle strips (kids-friendly narrow zones)
+function bindStrip(el, zone) {
+  el.addEventListener('touchstart', e => {
+    e.preventDefault();
+    for (const t of e.changedTouches) {
+      touchState[zone] = { id: t.identifier, y: getTouchY(t.clientY) };
+    }
+  }, { passive: false });
+  el.addEventListener('touchmove', e => {
+    e.preventDefault();
+    for (const t of e.changedTouches) {
+      if (touchState[zone] && touchState[zone].id === t.identifier) {
+        touchState[zone].y = getTouchY(t.clientY);
+      }
+    }
+  }, { passive: false });
+  el.addEventListener('touchend', e => {
+    for (const t of e.changedTouches) {
+      if (touchState[zone] && touchState[zone].id === t.identifier) touchState[zone] = null;
+    }
+  });
+}
+bindStrip(document.getElementById('touch-strip-left'),  'left');
+bindStrip(document.getElementById('touch-strip-right'), 'right');
 
-// Apply touch paddle positions each frame (called from update())
+// Apply touch paddle positions each frame — snaps paddle center to finger (instant, kid-friendly)
 function applyTouchInput(H) {
-  const TOUCH_SPEED = canvas.height * 0.016; // slightly faster than keyboard for responsiveness
-
   if (touchState.left) {
     const targetY = touchState.left.y - lPaddle.h / 2;
-    const diff = targetY - lPaddle.y;
-    lPaddle.y += Math.min(Math.abs(diff), TOUCH_SPEED) * Math.sign(diff);
-    lPaddle.y = Math.max(0, Math.min(H - lPaddle.h, lPaddle.y));
+    lPaddle.y = Math.max(0, Math.min(H - lPaddle.h, targetY));
   }
   if (touchState.right && playerCount === 2) {
     const targetY = touchState.right.y - rPaddle.h / 2;
-    const diff = targetY - rPaddle.y;
-    rPaddle.y += Math.min(Math.abs(diff), TOUCH_SPEED) * Math.sign(diff);
-    rPaddle.y = Math.max(0, Math.min(H - rPaddle.h, rPaddle.y));
+    rPaddle.y = Math.max(0, Math.min(H - rPaddle.h, targetY));
   }
 }
 
