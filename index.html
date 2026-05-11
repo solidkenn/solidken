@@ -4,6 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>solidkenn.exe</title>
+<link rel="icon" href="favicon.png" type="image/png" />
+<link rel="apple-touch-icon" href="favicon.png" />
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -295,8 +297,14 @@
   .about-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 3rem;
+    column-gap: 3rem;
+    row-gap: 0.75rem;
     align-items: start;
+  }
+
+  .about-grid > .section-label.about-label-span {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
   }
 
   .about-bio { color: var(--muted); line-height: 1.9; }
@@ -1034,6 +1042,125 @@
 
   .fade-in.visible { opacity: 1; transform: none; }
 
+
+  /* ── PROJECTS DECK (main section only) ── */
+  .projects-deck-hint {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(245,208,0,0.55);
+    margin: -0.25rem 0 1.25rem;
+    text-align: center;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+  }
+
+  .projects-deck-hint.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    height: 0;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  #projects .projects-deck-grid:not(.is-expanded) {
+    display: block;
+    position: relative;
+    min-height: clamp(300px, 48vw, 420px);
+    cursor: pointer;
+    outline: none;
+  }
+
+  #projects .projects-deck-grid:not(.is-expanded):focus-visible {
+    box-shadow: 0 0 0 2px rgba(245,208,0,0.45);
+    border-radius: 10px;
+  }
+
+  #projects .projects-deck-grid:not(.is-expanded) .project-card {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(380px, 92vw);
+    margin: 0;
+    transition: border-color 0.25s, box-shadow 0.25s;
+    will-change: transform;
+  }
+
+  #projects .projects-deck-grid:not(.is-expanded) .project-card:hover {
+    border-color: rgba(245,208,0,0.35);
+    box-shadow: 0 18px 40px rgba(245,208,0,0.12), 0 8px 20px rgba(0,0,0,0.5);
+    transform: translate(calc(-50% + var(--deck-tx, 0px)), calc(-50% + var(--deck-ty, 0px))) rotate(var(--deck-rot, 0deg)) translateY(-4px);
+  }
+
+  #projects .projects-deck-grid:not(.is-expanded) .project-card:hover::before {
+    transform: scaleY(1);
+  }
+
+  #projects .projects-deck-grid:not(.is-expanded) .project-card:hover h3 {
+    color: var(--accent);
+  }
+
+  #projects .projects-deck-grid.is-animating .project-card {
+    pointer-events: none;
+    will-change: transform, opacity, filter;
+  }
+
+  #projects .projects-deck-grid.is-expanded:not(.is-animating) .project-card {
+    animation: projectCardSettle 0.45s ease;
+  }
+
+  @keyframes projectCardSettle {
+    from { box-shadow: 0 22px 55px rgba(245,208,0,0.1), 0 10px 26px rgba(0,0,0,0.45); }
+    to { box-shadow: none; }
+  }
+
+  #projects .projects-deck-grid:not(.is-expanded) .project-card:nth-child(1) {
+    --deck-tx: -18px; --deck-ty: 14px; --deck-rot: -5deg;
+    z-index: 1;
+    transform: translate(calc(-50% + var(--deck-tx)), calc(-50% + var(--deck-ty))) rotate(var(--deck-rot));
+  }
+  #projects .projects-deck-grid:not(.is-expanded) .project-card:nth-child(2) {
+    --deck-tx: -12px; --deck-ty: 9px; --deck-rot: -3deg;
+    z-index: 2;
+    transform: translate(calc(-50% + var(--deck-tx)), calc(-50% + var(--deck-ty))) rotate(var(--deck-rot));
+  }
+  #projects .projects-deck-grid:not(.is-expanded) .project-card:nth-child(3) {
+    --deck-tx: -6px; --deck-ty: 5px; --deck-rot: -1.5deg;
+    z-index: 3;
+    transform: translate(calc(-50% + var(--deck-tx)), calc(-50% + var(--deck-ty))) rotate(var(--deck-rot));
+  }
+  #projects .projects-deck-grid:not(.is-expanded) .project-card:nth-child(4) {
+    --deck-tx: 0px; --deck-ty: 2px; --deck-rot: 0deg;
+    z-index: 4;
+    transform: translate(calc(-50% + var(--deck-tx)), calc(-50% + var(--deck-ty))) rotate(var(--deck-rot));
+  }
+  #projects .projects-deck-grid:not(.is-expanded) .project-card:nth-child(5) {
+    --deck-tx: 6px; --deck-ty: -1px; --deck-rot: 1deg;
+    z-index: 5;
+    transform: translate(calc(-50% + var(--deck-tx)), calc(-50% + var(--deck-ty))) rotate(var(--deck-rot));
+  }
+  #projects .projects-deck-grid:not(.is-expanded) .project-card:nth-child(6) {
+    --deck-tx: 12px; --deck-ty: -5px; --deck-rot: 2deg;
+    z-index: 6;
+    transform: translate(calc(-50% + var(--deck-tx)), calc(-50% + var(--deck-ty))) rotate(var(--deck-rot));
+  }
+  #projects .projects-deck-grid:not(.is-expanded) .project-card:nth-child(7) {
+    --deck-tx: 18px; --deck-ty: -9px; --deck-rot: 3.5deg;
+    z-index: 7;
+    transform: translate(calc(-50% + var(--deck-tx)), calc(-50% + var(--deck-ty))) rotate(var(--deck-rot));
+  }
+  #projects .projects-deck-grid:not(.is-expanded) .project-card:nth-child(8) {
+    --deck-tx: 24px; --deck-ty: -13px; --deck-rot: 5deg;
+    z-index: 8;
+    transform: translate(calc(-50% + var(--deck-tx)), calc(-50% + var(--deck-ty))) rotate(var(--deck-rot));
+  }
+
+  #projects .projects-deck-grid:not(.is-expanded) .project-card:nth-child(n+9) {
+    --deck-tx: 28px; --deck-ty: -16px; --deck-rot: 6deg;
+    z-index: 9;
+    transform: translate(calc(-50% + var(--deck-tx)), calc(-50% + var(--deck-ty))) rotate(var(--deck-rot));
+  }
+
   /* TABLET */
   @media (max-width: 1024px) {
     .projects-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1260,7 +1387,7 @@
   <ul class="nav-links" id="nav-links">
     <li><a href="#about">about</a></li>
     <li><a href="#projects">projects</a></li>
-    <li><a href="#side-projects">side projects</a></li>
+    <li><a href="#freelance-projects">freelance projects</a></li>
     <li><a href="#hobbies">hobbies</a></li>
     <li><a href="#contact">contact</a></li>
   </ul>
@@ -1302,8 +1429,8 @@
 <!-- ── ABOUT ── -->
 <section id="about">
   <div class="about-grid fade-in">
-    <div>
-      <div class="section-label">// about me</div>
+    <div class="section-label about-label-span">// about me</div>
+    <div class="about-main">
       <h2>The person<br/>behind the code.</h2>
       <p class="about-bio">
 	    Welcome to my website! If you are interested in my work and hobbies feel free to browse my website.
@@ -1315,6 +1442,7 @@
         I enjoy solving the kind of problems that most people don't even realize are problems. It's like a famous meme said:
 		<br/>
 		<strong>"I Don't Want Peace, I Want Problems, Always"</strong>
+      </p>
       <div class="skills-list">
         <span class="skill-tag highlight">Java</span>
         <span class="skill-tag highlight">Springboot</span>
@@ -1382,7 +1510,8 @@
   <div class="section-label">// selected work</div>
   <h2>Projects &<br/>contributions.</h2>
   <p class="section-intro">A selection of technical work — real systems, real problems, real solutions.</p>
-  <div class="projects-grid fade-in">
+  <p class="projects-deck-hint" id="projects-deck-hint">Click the stack to reveal all projects.</p>
+  <div class="projects-grid projects-deck-grid fade-in" id="projects-deck-grid" tabindex="0" role="group" aria-label="Selected work projects. Press Enter or click to expand the card stack.">
     <div class="project-card">
       <div class="project-number">01 — Springboot/SQL Server/Tomcat</div>
       <h3>Accounting System Migration</h3>
@@ -1467,10 +1596,10 @@
   </div>
 </section>
 
-<!-- ── SIDE PROJECTS ── -->
-<section id="side-projects">
+<!-- ── FREELANCE PROJECTS ── -->
+<section id="freelance-projects">
   <div class="section-label">// non corporate</div>
-  <h2>Side Projects.</h2>
+  <h2>Freelance Projects.</h2>
   <p class="section-intro">More of a hobby and learning new tech stacks.</p>
   <div class="projects-grid fade-in">
 
@@ -1581,7 +1710,7 @@
         <span class="project-tag">Google Sheet</span>
       </div>
       <div style="margin-top: 1.25rem;">
-        <a href="https://solidkenn.github.io/surgimatch/" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="font-size: 0.75rem; padding: 0.5rem 1.25rem;" onclick="event.stopPropagation()">▶ Visit Now</a>
+        <a href="https://www.surgimatch.au/" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="font-size: 0.75rem; padding: 0.5rem 1.25rem;" onclick="event.stopPropagation()">▶ Visit Now</a>
       </div>
     </div>
 
@@ -2617,6 +2746,136 @@
     } catch(e) {}
   }
 
+  const projectBtnSound = new Audio('Audio Track.mp3');
+  projectBtnSound.volume = 0.5;
+  projectBtnSound.preload = 'auto';
+
+  function playProjectChime() {
+    if (soundMuted) return;
+    try {
+      projectBtnSound.currentTime = 0;
+      projectBtnSound.play().catch(() => {});
+    } catch (e) {}
+  }
+
+  // ── Main projects deck: stacked → grid (FLIP) ─────────────────────────
+  const projectsDeckGrid = document.getElementById('projects-deck-grid');
+  const projectsDeckHint = document.getElementById('projects-deck-hint');
+  const reduceMotionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function initProjectsDeck() {
+    if (!projectsDeckGrid) return;
+
+    function deckCards() {
+      return Array.from(projectsDeckGrid.querySelectorAll(':scope > .project-card'));
+    }
+
+    function expandProjectsDeck() {
+      if (projectsDeckGrid.classList.contains('is-expanded')) return;
+      const cards = deckCards();
+      if (!cards.length) return;
+
+      playProjectChime();
+      if (projectsDeckHint) projectsDeckHint.classList.add('is-hidden');
+      projectsDeckGrid.removeAttribute('tabindex');
+      projectsDeckGrid.setAttribute('aria-expanded', 'true');
+
+      if (reduceMotionMq.matches) {
+        projectsDeckGrid.classList.add('is-expanded');
+        return;
+      }
+
+      const firstRects = cards.map(el => el.getBoundingClientRect());
+      projectsDeckGrid.classList.add('is-expanded');
+      void projectsDeckGrid.offsetWidth;
+      const lastRects = cards.map(el => el.getBoundingClientRect());
+
+      projectsDeckGrid.classList.add('is-animating');
+
+      cards.forEach((el, i) => {
+        const fr = firstRects[i];
+        const lr = lastRects[i];
+        const dx = fr.left - lr.left;
+        const dy = fr.top - lr.top;
+        const sx = fr.width / (lr.width || 1);
+        const sy = fr.height / (lr.height || 1);
+        const delayMs = i * 45;
+        const tilt = (i % 2 === 0 ? -1 : 1) * Math.min(6, 2 + i * 0.35);
+        const fromTransform =
+          'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ') rotate(' + tilt + 'deg)';
+
+        el.style.transformOrigin = '0 0';
+
+        if (typeof el.animate === 'function') {
+          const spreadAnimation = el.animate([
+            {
+              transform: fromTransform,
+              opacity: 0.78,
+              filter: 'blur(2px)'
+            },
+            {
+              transform: 'translate(0, 0) scale(1) rotate(0deg)',
+              opacity: 1,
+              filter: 'blur(0)'
+            }
+          ], {
+            duration: 850,
+            delay: delayMs,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'both'
+          });
+
+          spreadAnimation.finished
+            .then(function () {
+              spreadAnimation.cancel();
+            })
+            .catch(function () {});
+        } else {
+          el.style.transform = fromTransform;
+          el.style.transition = 'none';
+
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              el.style.transition =
+                'transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) ' + delayMs + 'ms, opacity 0.45s ease ' + delayMs + 'ms';
+              el.style.transform = '';
+              el.style.opacity = '1';
+            });
+          });
+        }
+      });
+
+      var maxDelay = (cards.length - 1) * 45 + 850;
+      setTimeout(function () {
+        projectsDeckGrid.classList.remove('is-animating');
+        cards.forEach(function (el) {
+          el.style.transition = '';
+          el.style.transformOrigin = '';
+          el.style.opacity = '';
+          el.style.filter = '';
+        });
+      }, maxDelay + 80);
+    }
+
+    projectsDeckGrid.setAttribute('aria-expanded', 'false');
+
+    projectsDeckGrid.addEventListener('click', function () {
+      if (!projectsDeckGrid.classList.contains('is-expanded')) {
+        expandProjectsDeck();
+      }
+    });
+
+    projectsDeckGrid.addEventListener('keydown', function (e) {
+      if (projectsDeckGrid.classList.contains('is-expanded')) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        expandProjectsDeck();
+      }
+    });
+  }
+
+  initProjectsDeck();
+
   document.querySelectorAll('.project-card').forEach(card => {
     card.addEventListener('mouseenter', playHoverSound);
   });
@@ -2778,14 +3037,9 @@
   });
 
   // ── Project button click sound ─────────────────────────────────────────
-  const projectBtnSound = new Audio('Audio Track.mp3');
-  projectBtnSound.volume = 0.5;
-
   document.querySelectorAll('.project-card .btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      if (soundMuted) return;
-      projectBtnSound.currentTime = 0;
-      projectBtnSound.play().catch(() => {});
+      playProjectChime();
     });
   });
 
@@ -2793,9 +3047,7 @@
   const travelMapBtn = document.querySelector('.travel-map-btn');
   if (travelMapBtn) {
     travelMapBtn.addEventListener('click', () => {
-      if (soundMuted) return;
-      projectBtnSound.currentTime = 0;
-      projectBtnSound.play().catch(() => {});
+      playProjectChime();
     });
   }
 
